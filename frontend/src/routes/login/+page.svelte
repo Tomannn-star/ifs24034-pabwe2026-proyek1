@@ -3,9 +3,22 @@
   import { auth } from "$lib/stores/auth.js";
   import { api } from "$lib/api.js";
   import { goto } from "$app/navigation";
+  import Button from "$lib/components/Button.svelte";
+  import {
+    Wallet,
+    Eye,
+    EyeOff,
+    AlertCircle,
+    CheckCircle2,
+    ShieldCheck,
+    Coins,
+    Sparkles,
+    ArrowRight
+  } from "lucide-svelte";
 
   let username = $state("");
   let password = $state("");
+  let showPassword = $state(false);
   let errorMessage = $state("");
   let isLoading = $state(false);
 
@@ -44,7 +57,7 @@
     }
   }
 
-  // Helper untuk memudahkan penguji / dosen login dengan akun demo
+  // Helper untuk memudahkan pengisian akun demo
   function setDemoAccount(u, p) {
     username = u;
     password = p;
@@ -56,117 +69,227 @@
   <title>Login - KasPintar</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-50 via-slate-50 to-blue-100">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-    <!-- Header Banner -->
-    <div class="bg-indigo-600 p-8 text-center text-white">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-3 backdrop-blur-sm shadow-inner">
-        <span class="text-3xl">💰</span>
-      </div>
-      <h1 class="text-2xl font-bold tracking-tight">KasPintar</h1>
-      <p class="text-indigo-100 text-sm mt-1">Sistem Pencatatan Uang Kas Kelas</p>
-    </div>
+<div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+  <div class="w-full max-w-4xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden grid lg:grid-cols-12 min-h-[580px]">
+    
+    <!-- ========================================================= -->
+    <!-- KOLOM KIRI (Brand Showcase Fintech Panel)                 -->
+    <!-- ========================================================= -->
+    <div class="lg:col-span-5 bg-gradient-to-br from-teal-900 via-teal-800 to-emerald-950 p-8 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden">
+      <!-- Dekorasi Latar Halus -->
+      <div class="absolute -top-24 -left-24 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="p-8">
-      {#if errorMessage}
-        <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm flex items-center gap-2.5">
-          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{errorMessage}</span>
-        </div>
-      {/if}
-
-      <form onsubmit={handleLogin} class="space-y-4">
-        <div>
-          <label for="username" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            bind:value={username}
-            placeholder="Masukkan username kamu"
-            required
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
-          />
+      <!-- Header Brand -->
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-teal-200 mb-6">
+          <Sparkles class="w-3.5 h-3.5 text-teal-300" />
+          <span>Sistem Kas Kelas Modern</span>
         </div>
 
-        <div>
-          <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            bind:value={password}
-            placeholder="Masukkan kata sandi"
-            required
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          class="w-full mt-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {#if isLoading}
-            <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-            </svg>
-            <span>Memproses Masuk...</span>
-          {:else}
-            <span>Masuk ke KasPintar</span>
-          {/if}
-        </button>
-      </form>
-
-      <!-- Akun Demo Cepat untuk Uji Coba -->
-      <div class="mt-8 pt-6 border-t border-slate-100">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 text-center mb-3">
-          Akun Demo Siap Pakai:
-        </p>
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <button
-            type="button"
-            onclick={() => setDemoAccount("bendahara", "bendahara123")}
-            class="p-2.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 rounded-lg text-left transition font-medium"
-          >
-            <div class="font-bold text-slate-800">👑 Bendahara</div>
-            <div class="text-slate-500 text-[11px]">bendahara / bendahara123</div>
-          </button>
-
-          <button
-            type="button"
-            onclick={() => setDemoAccount("anggota1", "anggota123")}
-            class="p-2.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 rounded-lg text-left transition font-medium"
-          >
-            <div class="font-bold text-slate-800">👤 Anggota 1</div>
-            <div class="text-slate-500 text-[11px]">Ahmad (Lunas s/d Sept)</div>
-          </button>
-
-          <button
-            type="button"
-            onclick={() => setDemoAccount("anggota2", "anggota123")}
-            class="p-2.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border border-slate-200 rounded-lg text-left transition font-medium"
-          >
-            <div class="font-bold text-slate-800">⚠️ Anggota 2</div>
-            <div class="text-slate-500 text-[11px]">Budi (Ada Tunggakan)</div>
-          </button>
-
-          <button
-            type="button"
-            onclick={() => setDemoAccount("anggota3", "anggota123")}
-            class="p-2.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 rounded-lg text-left transition font-medium"
-          >
-            <div class="font-bold text-slate-800">✅ Anggota 3</div>
-            <div class="text-slate-500 text-[11px]">Citra (Semua Lunas)</div>
-          </button>
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-white text-teal-900 flex items-center justify-center shadow-lg">
+            <Wallet class="w-6 h-6 text-teal-800" />
+          </div>
+          <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-white leading-none">KasPintar</h1>
+            <p class="text-xs text-teal-200/90 font-medium mt-1">Transparansi Keuangan Kelas</p>
+          </div>
         </div>
       </div>
+
+      <!-- Feature Bullets -->
+      <div class="relative z-10 my-8 space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
+            <CheckCircle2 class="w-3.5 h-3.5 text-teal-300" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Transparansi Real-Time</h3>
+            <p class="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+              Semua mutasi kas masuk & keluar tercatat terbuka untuk seluruh anggota.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
+            <Coins class="w-3.5 h-3.5 text-teal-300" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Pelacakan Iuran Akurat</h3>
+            <p class="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+              Otomatis hitung status lunas, belum bayar, dan denda keterlambatan.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
+            <ShieldCheck class="w-3.5 h-3.5 text-teal-300" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Akses Akun Terpisah</h3>
+            <p class="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+              Peran bendahara untuk mengelola kas, dan peran anggota untuk memantau.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Brand Info -->
+      <div class="relative z-10 pt-4 border-t border-teal-700/40 text-[11px] text-teal-200/70">
+        Praktikum PABWE &bull; Bun &bull; SvelteKit SPA
+      </div>
     </div>
+
+    <!-- ========================================================= -->
+    <!-- KOLOM KANAN (Form Login Bersih & Modern)                  -->
+    <!-- ========================================================= -->
+    <div class="lg:col-span-7 p-8 sm:p-10 flex flex-col justify-between">
+      <div class="max-w-md w-full mx-auto">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Selamat Datang</h2>
+          <p class="text-sm text-slate-500 mt-1">
+            Masuk ke akun KasPintar untuk mengelola atau memantau kas kelas.
+          </p>
+        </div>
+
+        {#if errorMessage}
+          <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-700 text-xs sm:text-sm animate-in fade-in duration-150">
+            <AlertCircle class="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+            <div class="leading-snug">
+              <span class="font-bold">Gagal Masuk:</span> {errorMessage}
+            </div>
+          </div>
+        {/if}
+
+        <form onsubmit={handleLogin} class="space-y-4">
+          <!-- Input Username -->
+          <div class="space-y-1.5">
+            <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              bind:value={username}
+              placeholder="Contoh: bendahara atau anggota1"
+              required
+              autocomplete="username"
+              class="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+            />
+          </div>
+
+          <!-- Input Password dengan Toggle Lihat/Sembunyikan -->
+          <div class="space-y-1.5">
+            <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Password
+            </label>
+            <div class="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                bind:value={password}
+                placeholder="Masukkan kata sandi akun"
+                required
+                autocomplete="current-password"
+                class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+              />
+              <button
+                type="button"
+                onclick={() => (showPassword = !showPassword)}
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition"
+                title={showPassword ? "Sembunyikan password" : "Lihat password"}
+                aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
+              >
+                {#if showPassword}
+                  <EyeOff class="w-4 h-4" />
+                {:else}
+                  <Eye class="w-4 h-4" />
+                {/if}
+              </button>
+            </div>
+          </div>
+
+          <!-- Tombol Submit -->
+          <div class="pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={isLoading}
+              class="w-full justify-center shadow-sm hover:shadow-md"
+            >
+              <span>{isLoading ? "Memproses Autentikasi..." : "Masuk ke KasPintar"}</span>
+              {#if !isLoading}
+                <ArrowRight class="w-4 h-4 ml-1" />
+              {/if}
+            </Button>
+          </div>
+        </form>
+
+        <!-- Kotak Kecil Akun Demo (Discrete & Rapi) -->
+        <div class="mt-8 pt-5 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Akun Demo Uji Coba:
+            </span>
+            <span class="text-[11px] text-teal-700 font-semibold">Klik untuk isi otomatis</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button
+              type="button"
+              onclick={() => setDemoAccount("bendahara", "bendahara123")}
+              class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 transition cursor-pointer group"
+            >
+              <div class="font-bold text-slate-800 group-hover:text-teal-900 flex items-center justify-between">
+                <span>Bendahara</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-semibold">Admin</span>
+              </div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">bendahara123</div>
+            </button>
+
+            <button
+              type="button"
+              onclick={() => setDemoAccount("anggota1", "anggota123")}
+              class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 transition cursor-pointer group"
+            >
+              <div class="font-bold text-slate-800 group-hover:text-teal-900 flex items-center justify-between">
+                <span>Ahmad</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold">Anggota 1</span>
+              </div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">anggota123</div>
+            </button>
+
+            <button
+              type="button"
+              onclick={() => setDemoAccount("anggota2", "anggota123")}
+              class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50/50 transition cursor-pointer group"
+            >
+              <div class="font-bold text-slate-800 group-hover:text-rose-900 flex items-center justify-between">
+                <span>Budi</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-700 font-semibold">Menunggak</span>
+              </div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">anggota123</div>
+            </button>
+
+            <button
+              type="button"
+              onclick={() => setDemoAccount("anggota3", "anggota123")}
+              class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition cursor-pointer group"
+            >
+              <div class="font-bold text-slate-800 group-hover:text-emerald-900 flex items-center justify-between">
+                <span>Citra</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-semibold">Lunas</span>
+              </div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">anggota123</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-

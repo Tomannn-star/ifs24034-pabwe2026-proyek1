@@ -30,10 +30,18 @@ export async function apiRequest(endpoint, options = {}) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers
+    });
+  } catch (err) {
+    // Tangani error jaringan (misal server backend belum dinyalakan)
+    throw new Error(
+      "Gagal terhubung ke server backend (port 5001). Pastikan server backend sedang berjalan."
+    );
+  }
 
   // Jika token tidak valid / kedaluwarsa, otomatis logout ke login page
   if (response.status === 401) {

@@ -1,18 +1,31 @@
 <script>
   import "./layout.css";
-  import { onMount } from "svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/stores/auth.js";
   import { browser } from "$app/environment";
+  import Toast from "$lib/components/Toast.svelte";
+  import Badge from "$lib/components/Badge.svelte";
+  import {
+    LayoutDashboard,
+    Receipt,
+    CalendarClock,
+    Users,
+    AlertTriangle,
+    Tag,
+    LogOut,
+    Menu,
+    X,
+    Wallet
+  } from "lucide-svelte";
 
   let { children } = $props();
 
   let currentUser = $state(null);
   let token = $state(null);
-  let isMobileMenuOpen = $state(false);
+  let isMobileDrawerOpen = $state(false);
 
-  // Subscribe ke state auth
+  // Subscribe ke status autentikasi
   $effect(() => {
     const unsub = auth.subscribe((val) => {
       token = val.token;
@@ -21,7 +34,7 @@
     return unsub;
   });
 
-  // Client-side route guard (hanya untuk UX navigasi)
+  // Client-side route guard
   $effect(() => {
     if (!browser) return;
 
@@ -42,213 +55,324 @@
   });
 
   function handleLogout() {
+    isMobileDrawerOpen = false;
     auth.logout(true);
   }
 
-  function toggleMobileMenu() {
-    isMobileMenuOpen = !isMobileMenuOpen;
+  function getInitials(name) {
+    if (!name) return "KP";
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   }
 </script>
+
+<svelte:head>
+  <title>KasPintar - Sistem Pencatatan Uang Kas Kelas</title>
+</svelte:head>
+
+<!-- Komponen Notifikasi Toast Global -->
+<Toast />
 
 {#if page.url.pathname === "/login"}
   {@render children()}
 {:else}
-  <div class="min-h-screen flex flex-col bg-slate-50/70 text-slate-800">
-    <!-- Navbar Modern Glassmorphism -->
-    <header class="bg-indigo-600/95 backdrop-blur-md text-white shadow-sm sticky top-0 z-40 border-b border-indigo-500/30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo & Brand KasPintar -->
-          <div class="flex items-center gap-3">
-            <a href="/" class="flex items-center gap-2.5 group transition">
-              <div class="w-9 h-9 rounded-xl bg-white/15 group-hover:bg-white/25 flex items-center justify-center text-xl transition shadow-inner">
-                💰
-              </div>
-              <span class="font-extrabold text-xl tracking-tight text-white">KasPintar</span>
-            </a>
-            <span class="hidden sm:inline-block text-[11px] font-semibold px-2.5 py-0.5 bg-indigo-700/70 rounded-full text-indigo-100 border border-indigo-400/30">
-              Kas Kelas
-            </span>
+  <div class="min-h-screen bg-slate-50 text-slate-800 flex">
+    <!-- ========================================================= -->
+    <!-- SIDEBAR DESKTOP (Linear / Mercury Modern Fintech Style)   -->
+    <!-- ========================================================= -->
+    <aside class="hidden lg:flex flex-col w-64 xl:w-72 bg-white border-r border-slate-200/80 fixed inset-y-0 left-0 z-30 select-none">
+      <!-- Brand Header -->
+      <div class="h-20 px-6 border-b border-slate-100 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-teal-700 text-white flex items-center justify-center shadow-xs transition group-hover:scale-105 duration-150">
+            <Wallet class="w-5 h-5 text-white" />
           </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-lg text-slate-900 tracking-tight leading-none">KasPintar</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-500" title="Aktif"></span>
+            </div>
+            <p class="text-[11px] font-medium text-slate-400 mt-1">Uang Kas Kelas</p>
+          </div>
+        </a>
+      </div>
 
-          <!-- Menu Desktop Modern Nav Pills -->
-          <nav class="hidden md:flex items-center gap-1 text-sm font-semibold">
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
+        <!-- Grup: Utama -->
+        <div>
+          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+            Menu Utama
+          </p>
+          <div class="space-y-1">
             <a
               href="/"
-              class="px-3 py-2 rounded-xl transition duration-150 {page.url.pathname === '/' ? 'bg-white text-indigo-700 shadow-sm' : 'text-indigo-100 hover:text-white hover:bg-white/10'}"
+              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
             >
-              Dashboard
+              <LayoutDashboard class="w-4 h-4 {page.url.pathname === '/' ? 'text-teal-700' : 'text-slate-400'}" />
+              <span>Dashboard</span>
             </a>
 
             <a
               href="/transaksi"
-              class="px-3 py-2 rounded-xl transition duration-150 {page.url.pathname.startsWith('/transaksi') ? 'bg-white text-indigo-700 shadow-sm' : 'text-indigo-100 hover:text-white hover:bg-white/10'}"
+              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname.startsWith('/transaksi') ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
             >
-              Transaksi
+              <Receipt class="w-4 h-4 {page.url.pathname.startsWith('/transaksi') ? 'text-teal-700' : 'text-slate-400'}" />
+              <span>Transaksi</span>
             </a>
 
             <a
               href="/iuran"
-              class="px-3 py-2 rounded-xl transition duration-150 {page.url.pathname === '/iuran' ? 'bg-white text-indigo-700 shadow-sm' : 'text-indigo-100 hover:text-white hover:bg-white/10'}"
+              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/iuran' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
             >
-              {currentUser?.role === 'bendahara' ? 'Kelola Iuran' : 'Iuran Saya'}
+              <CalendarClock class="w-4 h-4 {page.url.pathname === '/iuran' ? 'text-teal-700' : 'text-slate-400'}" />
+              <span>{currentUser?.role === 'bendahara' ? 'Kelola Iuran' : 'Iuran Saya'}</span>
             </a>
+          </div>
+        </div>
 
-            {#if currentUser?.role === "bendahara"}
+        <!-- Grup: Administrasi (Khusus Bendahara) -->
+        {#if currentUser?.role === "bendahara"}
+          <div>
+            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+              Administrasi
+            </p>
+            <div class="space-y-1">
               <a
                 href="/anggota"
-                class="px-3 py-2 rounded-xl transition duration-150 {page.url.pathname === '/anggota' ? 'bg-white text-indigo-700 shadow-sm' : 'text-indigo-100 hover:text-white hover:bg-white/10'}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/anggota' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
               >
-                Anggota
+                <Users class="w-4 h-4 {page.url.pathname === '/anggota' ? 'text-teal-700' : 'text-slate-400'}" />
+                <span>Anggota</span>
               </a>
 
               <a
                 href="/penunggak"
-                class="px-3 py-2 rounded-xl transition duration-150 {page.url.pathname === '/penunggak' ? 'bg-white text-indigo-700 shadow-sm' : 'text-indigo-100 hover:text-white hover:bg-white/10'}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/penunggak' ? 'bg-rose-50 text-rose-800 font-semibold shadow-2xs border border-rose-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
               >
-                Penunggak
+                <AlertTriangle class="w-4 h-4 {page.url.pathname === '/penunggak' ? 'text-rose-600' : 'text-slate-400'}" />
+                <span>Penunggak</span>
               </a>
 
               <a
                 href="/kategori"
-                class="px-3 py-2 rounded-xl transition duration-150 {page.url.pathname === '/kategori' ? 'bg-white text-indigo-700 shadow-sm' : 'text-indigo-100 hover:text-white hover:bg-white/10'}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/kategori' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
               >
-                Kategori
+                <Tag class="w-4 h-4 {page.url.pathname === '/kategori' ? 'text-teal-700' : 'text-slate-400'}" />
+                <span>Kategori</span>
               </a>
-            {/if}
-          </nav>
+            </div>
+          </div>
+        {/if}
+      </nav>
 
-          <!-- User Profil & Logout Desktop -->
-          <div class="hidden md:flex items-center gap-3 pl-3 border-l border-indigo-400/30">
-            <div class="text-right">
-              <div class="text-sm font-bold text-white leading-tight">{currentUser?.nama || currentUser?.username}</div>
-              <div class="text-[10px] text-indigo-200 uppercase tracking-widest font-semibold flex items-center justify-end gap-1">
-                {#if currentUser?.role === 'bendahara'}
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
-                  <span>Bendahara</span>
+      <!-- User Profile & Logout Bottom Card -->
+      <div class="p-4 border-t border-slate-100 bg-slate-50/60">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center shrink-0 border border-teal-200/60 shadow-2xs">
+              {getInitials(currentUser?.nama || currentUser?.username)}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-slate-800 truncate leading-tight">
+                {currentUser?.nama || currentUser?.username}
+              </p>
+              <div class="mt-0.5">
+                {#if currentUser?.role === "bendahara"}
+                  <Badge variant="amber" size="sm">Bendahara</Badge>
                 {:else}
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>
-                  <span>Anggota</span>
+                  <Badge variant="primary" size="sm">Anggota</Badge>
                 {/if}
               </div>
             </div>
-
-            <button
-              onclick={handleLogout}
-              class="p-2 text-indigo-100 hover:text-white hover:bg-white/10 rounded-xl transition duration-150"
-              title="Keluar dari akun KasPintar"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
           </div>
 
-          <!-- Mobile Hamburger -->
-          <div class="flex md:hidden">
-            <button
-              onclick={toggleMobileMenu}
-              class="p-2 rounded-xl text-indigo-100 hover:text-white hover:bg-white/10 transition"
-              aria-label="Menu"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {#if isMobileMenuOpen}
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                {:else}
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                {/if}
-              </svg>
-            </button>
-          </div>
+          <button
+            type="button"
+            onclick={handleLogout}
+            class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition duration-150 shrink-0 cursor-pointer"
+            title="Keluar dari KasPintar"
+            aria-label="Logout"
+          >
+            <LogOut class="w-4 h-4" />
+          </button>
         </div>
       </div>
+    </aside>
 
-      <!-- Dropdown Mobile Menu -->
-      {#if isMobileMenuOpen}
-        <div class="md:hidden border-t border-indigo-500/40 px-4 pt-3 pb-4 space-y-1 bg-indigo-700/95 backdrop-blur-md">
-          <div class="py-2 mb-2 border-b border-indigo-600/60 flex items-center justify-between">
-            <div>
-              <div class="font-bold text-sm text-white">{currentUser?.nama || currentUser?.username}</div>
-              <div class="text-xs text-indigo-200">
-                {currentUser?.role === 'bendahara' ? '👑 Bendahara Kas' : '👤 Anggota'}
+    <!-- ========================================================= -->
+    <!-- MOBILE TOP BAR & DRAWER                                   -->
+    <!-- ========================================================= -->
+    <div class="lg:hidden fixed top-0 inset-x-0 h-16 bg-white border-b border-slate-200/80 px-4 flex items-center justify-between z-30 shadow-2xs">
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-teal-700 text-white flex items-center justify-center shadow-xs">
+          <Wallet class="w-4 h-4 text-white" />
+        </div>
+        <span class="font-bold text-base text-slate-900 tracking-tight">KasPintar</span>
+      </a>
+
+      <button
+        type="button"
+        onclick={() => (isMobileDrawerOpen = !isMobileDrawerOpen)}
+        class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+        aria-label="Buka Menu"
+      >
+        {#if isMobileDrawerOpen}
+          <X class="w-5 h-5" />
+        {:else}
+          <Menu class="w-5 h-5" />
+        {/if}
+      </button>
+    </div>
+
+    <!-- Mobile Drawer Overlay -->
+    {#if isMobileDrawerOpen}
+      <div
+        class="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 animate-in fade-in duration-150"
+        onclick={() => (isMobileDrawerOpen = false)}
+        onkeydown={(e) => e.key === 'Escape' && (isMobileDrawerOpen = false)}
+        role="button"
+        tabindex="0"
+      ></div>
+
+      <div class="lg:hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white z-50 shadow-2xl flex flex-col justify-between animate-in slide-in-from-left duration-200">
+        <div>
+          <!-- Drawer Header -->
+          <div class="h-16 px-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-teal-700 text-white flex items-center justify-center">
+                <Wallet class="w-4 h-4 text-white" />
               </div>
+              <span class="font-bold text-base text-slate-900">KasPintar</span>
             </div>
             <button
+              type="button"
+              onclick={() => (isMobileDrawerOpen = false)}
+              class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              aria-label="Tutup Menu"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- Drawer Navigation -->
+          <nav class="p-3 space-y-4">
+            <div>
+              <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                Menu Utama
+              </p>
+              <div class="space-y-1">
+                <a
+                  href="/"
+                  onclick={() => (isMobileDrawerOpen = false)}
+                  class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
+                >
+                  <LayoutDashboard class="w-4 h-4 text-teal-700" />
+                  <span>Dashboard</span>
+                </a>
+
+                <a
+                  href="/transaksi"
+                  onclick={() => (isMobileDrawerOpen = false)}
+                  class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname.startsWith('/transaksi') ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
+                >
+                  <Receipt class="w-4 h-4 text-teal-700" />
+                  <span>Transaksi</span>
+                </a>
+
+                <a
+                  href="/iuran"
+                  onclick={() => (isMobileDrawerOpen = false)}
+                  class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/iuran' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
+                >
+                  <CalendarClock class="w-4 h-4 text-teal-700" />
+                  <span>{currentUser?.role === 'bendahara' ? 'Kelola Iuran' : 'Iuran Saya'}</span>
+                </a>
+              </div>
+            </div>
+
+            {#if currentUser?.role === "bendahara"}
+              <div>
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Administrasi
+                </p>
+                <div class="space-y-1">
+                  <a
+                    href="/anggota"
+                    onclick={() => (isMobileDrawerOpen = false)}
+                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/anggota' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
+                  >
+                    <Users class="w-4 h-4 text-teal-700" />
+                    <span>Anggota</span>
+                  </a>
+
+                  <a
+                    href="/penunggak"
+                    onclick={() => (isMobileDrawerOpen = false)}
+                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/penunggak' ? 'bg-rose-50 text-rose-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
+                  >
+                    <AlertTriangle class="w-4 h-4 text-rose-600" />
+                    <span>Penunggak</span>
+                  </a>
+
+                  <a
+                    href="/kategori"
+                    onclick={() => (isMobileDrawerOpen = false)}
+                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/kategori' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
+                  >
+                    <Tag class="w-4 h-4 text-teal-700" />
+                    <span>Kategori</span>
+                  </a>
+                </div>
+              </div>
+            {/if}
+          </nav>
+        </div>
+
+        <!-- Drawer User Card -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50">
+          <div class="flex items-center justify-between">
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-slate-800 truncate">{currentUser?.nama || currentUser?.username}</p>
+              <p class="text-xs text-slate-500 capitalize">{currentUser?.role}</p>
+            </div>
+            <button
+              type="button"
               onclick={handleLogout}
-              class="text-xs px-3 py-1 bg-white/15 hover:bg-white/25 text-white font-semibold rounded-lg"
+              class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-semibold transition"
             >
               Keluar
             </button>
           </div>
-
-          <a
-            href="/"
-            onclick={() => isMobileMenuOpen = false}
-            class="block px-3 py-2 rounded-xl text-sm font-semibold {page.url.pathname === '/' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:bg-white/10'}"
-          >
-            Dashboard
-          </a>
-
-          <a
-            href="/transaksi"
-            onclick={() => isMobileMenuOpen = false}
-            class="block px-3 py-2 rounded-xl text-sm font-semibold {page.url.pathname.startsWith('/transaksi') ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:bg-white/10'}"
-          >
-            Transaksi
-          </a>
-
-          <a
-            href="/iuran"
-            onclick={() => isMobileMenuOpen = false}
-            class="block px-3 py-2 rounded-xl text-sm font-semibold {page.url.pathname === '/iuran' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:bg-white/10'}"
-          >
-            {currentUser?.role === 'bendahara' ? 'Kelola Iuran' : 'Iuran Saya'}
-          </a>
-
-          {#if currentUser?.role === "bendahara"}
-            <a
-              href="/anggota"
-              onclick={() => isMobileMenuOpen = false}
-              class="block px-3 py-2 rounded-xl text-sm font-semibold {page.url.pathname === '/anggota' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:bg-white/10'}"
-            >
-              Anggota
-            </a>
-
-            <a
-              href="/penunggak"
-              onclick={() => isMobileMenuOpen = false}
-              class="block px-3 py-2 rounded-xl text-sm font-semibold {page.url.pathname === '/penunggak' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:bg-white/10'}"
-            >
-              Penunggak
-            </a>
-
-            <a
-              href="/kategori"
-              onclick={() => isMobileMenuOpen = false}
-              class="block px-3 py-2 rounded-xl text-sm font-semibold {page.url.pathname === '/kategori' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:bg-white/10'}"
-            >
-              Kategori
-            </a>
-          {/if}
-        </div>
-      {/if}
-    </header>
-
-    <!-- Main Workspace -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-      {@render children()}
-    </main>
-
-    <!-- Modern Minimalist Footer -->
-    <footer class="bg-white/60 border-t border-slate-200/70 py-4 text-center text-xs text-slate-500">
-      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div class="flex items-center gap-1.5 font-semibold text-slate-600">
-          <span>💰 KasPintar</span> &mdash; Sistem Pencatatan Uang Kas Kelas
-        </div>
-        <div class="text-[11px] text-slate-400">
-          Pengembangan Aplikasi Berbasis Web &bull; 2026
         </div>
       </div>
-    </footer>
+    {/if}
+
+    <!-- ========================================================= -->
+    <!-- MAIN CONTENT AREA                                         -->
+    <!-- ========================================================= -->
+    <div class="flex-1 min-w-0 flex flex-col min-h-screen lg:pl-64 xl:pl-72 pt-16 lg:pt-0">
+      <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {@render children()}
+      </main>
+
+      <!-- Minimalist Clean Footer -->
+      <footer class="border-t border-slate-200/80 bg-white/70 py-4 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-slate-700">KasPintar</span>
+            <span class="text-slate-300">&bull;</span>
+            <span>Sistem Pencatatan Uang Kas Kelas</span>
+          </div>
+          <div class="text-[11px] text-slate-400">
+            Praktikum Pengembangan Aplikasi Berbasis Web &bull; 2026
+          </div>
+        </div>
+      </footer>
+    </div>
   </div>
 {/if}
