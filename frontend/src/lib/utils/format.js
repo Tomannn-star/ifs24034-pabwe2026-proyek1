@@ -60,3 +60,4 @@ export function formatPeriode(periodeStr) {
     return periodeStr;
   }
 }
+

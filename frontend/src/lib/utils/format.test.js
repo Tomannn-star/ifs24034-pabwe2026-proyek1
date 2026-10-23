@@ -18,3 +18,4 @@ describe("Frontend Format Utilities", () => {
     expect(formatted).toMatch(/Oktober\s+2026/i);
   });
 });
+
