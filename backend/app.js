@@ -1,9 +1,16 @@
 import express from "express";
 import cors from "cors";
 
+// Import rute
+import categoriesRouter from "./routes/categories.js";
+import membersRouter from "./routes/members.js";
+import transactionsRouter from "./routes/transactions.js";
+import summaryRouter from "./routes/summary.js";
+import duesRouter from "./routes/dues.js";
+
 const app = express();
 
-// Konfigurasi CORS berdasarkan environment variable CORS_ORIGIN
+// Konfigurasi CORS
 const allowedOrigin = process.env.CORS_ORIGIN || "*";
 app.use(cors({
   origin: allowedOrigin,
@@ -12,25 +19,32 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// Body parser untuk JSON
+// Body parser JSON
 app.use(express.json());
 
-// Endpoint health check
+// Endpoint Health Check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Middleware penanganan 404 jika route tidak ditemukan
-export function notFoundHandler(req, res) {
-  res.status(404).json({ error: "Rute tidak ditemukan" });
-}
+// Daftarkan route API
+app.use("/api/categories", categoriesRouter);
+app.use("/api/members", membersRouter);
+app.use("/api/transactions", transactionsRouter);
+app.use("/api/summary", summaryRouter);
+app.use("/api/dues", duesRouter);
 
-// Global error handler
+// Middleware 404
+app.use((req, res) => {
+  res.status(404).json({ error: "Rute tidak ditemukan" });
+});
+
+// Middleware Global Error Handler
 // eslint-disable-next-line no-unused-vars
-export function errorHandler(err, req, res, next) {
+app.use((err, req, res, next) => {
   const status = err.status || 500;
-  const message = err.message || "Terjadi kesalahan pada server";
+  const message = err.message || "Terjadi kesalahan internal pada server";
   res.status(status).json({ error: message });
-}
+});
 
 export default app;

@@ -80,3 +80,4 @@ export function createDatabase(dbPath = process.env.DB_PATH || "./kaspintar.db")
 // Instance database default untuk aplikasi
 const db = createDatabase();
 export default db;
+

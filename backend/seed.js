@@ -206,3 +206,4 @@ export function seed(targetDb = defaultDb, options = {}) {
 if (import.meta.main) {
   seed();
 }
+
