@@ -49,3 +49,4 @@ export function requireRole(role) {
 export function generateToken(payload) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
 }
+

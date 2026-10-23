@@ -2,11 +2,13 @@ import express from "express";
 import cors from "cors";
 
 // Import rute
+import authRouter from "./routes/auth.js";
 import categoriesRouter from "./routes/categories.js";
 import membersRouter from "./routes/members.js";
 import transactionsRouter from "./routes/transactions.js";
 import summaryRouter from "./routes/summary.js";
 import duesRouter from "./routes/dues.js";
+import remindersRouter from "./routes/reminders.js";
 
 const app = express();
 
@@ -27,12 +29,14 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Daftarkan route API
+// Daftarkan route API dengan prefix /api
+app.use("/api/auth", authRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/members", membersRouter);
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/summary", summaryRouter);
 app.use("/api/dues", duesRouter);
+app.use("/api/reminders", remindersRouter);
 
 // Middleware 404
 app.use((req, res) => {
