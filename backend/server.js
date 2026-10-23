@@ -9,9 +9,10 @@ if (userCount === 0) {
   seed(db);
 }
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`🚀 KasPintar API Server berjalan di http://localhost:${PORT}`);
   console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
 });
+
