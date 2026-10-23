@@ -1,7 +1,22 @@
 <script>
   import { onMount } from "svelte";
   import { api } from "$lib/api.js";
+  import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatPeriode, formatTanggal } from "$lib/utils/format.js";
+  import PageHeader from "$lib/components/PageHeader.svelte";
+  import StatCard from "$lib/components/StatCard.svelte";
+  import Button from "$lib/components/Button.svelte";
+  import Badge from "$lib/components/Badge.svelte";
+  import EmptyState from "$lib/components/EmptyState.svelte";
+  import {
+    AlertTriangle,
+    RotateCcw,
+    Users,
+    CircleDollarSign,
+    MessageCircle,
+    ChevronRight,
+    CheckCircle2
+  } from "lucide-svelte";
 
   let overdueData = $state(null);
   let isLoading = $state(true);
@@ -19,9 +34,19 @@
       overdueData = res;
     } catch (err) {
       errorMessage = err.message || "Gagal memuat daftar penunggak";
+      toast.error(errorMessage);
     } finally {
       isLoading = false;
     }
+  }
+
+  function getWhatsAppUrl(p) {
+    if (!p.kontak) return null;
+    const phone = p.kontak.replace(/[^0-9]/g, "").replace(/^0/, "62");
+    const text = encodeURIComponent(
+      `Halo ${p.nama}, mengingatkan iuran uang kas kelas sebesar ${formatRupiah(p.total_tunggakan)} yang telah melewati jatuh tempo. Mohon segera melunasi kepada bendahara ya. Terima kasih!`
+    );
+    return `https://wa.me/${phone}?text=${text}`;
   }
 </script>
 
@@ -31,119 +56,118 @@
 
 <div class="space-y-6">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Daftar Penunggak Iuran Kas</h1>
-      <p class="text-slate-500 text-sm">
-        Daftar anggota kelas yang memiliki tagihan iuran melewati tanggal jatuh tempo.
-      </p>
-    </div>
-    <button
-      onclick={loadOverdueData}
-      class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition"
-    >
-      <span>🔄</span> Segarkan Data
-    </button>
-  </div>
-
-  {#if errorMessage}
-    <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm flex items-center justify-between">
-      <span>⚠️ {errorMessage}</span>
-      <button onclick={loadOverdueData} class="text-xs font-semibold underline">Coba lagi</button>
-    </div>
-  {/if}
+  <PageHeader
+    title="Daftar Penunggak Iuran Kas"
+    description="Daftar anggota kelas yang memiliki tagihan iuran melewati tanggal jatuh tempo."
+    icon={AlertTriangle}
+  >
+    <Button variant="secondary" size="sm" onclick={loadOverdueData}>
+      <RotateCcw class="w-3.5 h-3.5 mr-1.5" />
+      <span>Segarkan Data</span>
+    </Button>
+  </PageHeader>
 
   {#if isLoading}
-    <div class="p-12 text-center text-slate-400">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
-      <p class="mt-2 text-sm">Menganalisis keterlambatan iuran anggota...</p>
+    <div class="p-16 text-center text-slate-400">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-3 border-teal-700 border-t-transparent"></div>
+      <p class="mt-2 text-sm font-medium">Menganalisis keterlambatan iuran anggota...</p>
     </div>
   {:else if overdueData}
     <!-- Ringkasan Statistik Penunggak -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="bg-rose-50 border border-rose-200 rounded-2xl p-5 text-rose-900">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-5 text-rose-950 shadow-2xs">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Total Anggota Menunggak</span>
-          <span class="text-xl">👥</span>
+          <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
+            <Users class="w-5 h-5 text-rose-700" />
+          </div>
         </div>
-        <div class="text-3xl font-extrabold text-rose-600 mt-2">
-          {overdueData.total_anggota_menunggak} <span class="text-sm font-medium text-rose-700">Orang</span>
+        <div class="text-3xl font-extrabold text-rose-600 mt-3 tabular-nums">
+          {overdueData.total_anggota_menunggak} <span class="text-sm font-semibold text-rose-700">Orang</span>
         </div>
-        <p class="text-xs text-rose-600 mt-1">Anggota dengan minimal 1 tagihan lewat jatuh tempo</p>
+        <p class="text-xs text-rose-600/90 mt-1">Anggota dengan minimal 1 tagihan lewat tanggal jatuh tempo</p>
       </div>
 
-      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-amber-900">
+      <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 text-amber-950 shadow-2xs">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Total Tunggakan Tertahan</span>
-          <span class="text-xl">💸</span>
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+            <CircleDollarSign class="w-5 h-5 text-amber-700" />
+          </div>
         </div>
-        <div class="text-3xl font-extrabold text-amber-600 mt-2">
+        <div class="text-3xl font-extrabold text-amber-600 mt-3 tabular-nums">
           {formatRupiah(overdueData.grand_total_tunggakan)}
         </div>
-        <p class="text-xs text-amber-700 mt-1">Akumulasi seluruh tagihan yang belum dibayar</p>
+        <p class="text-xs text-amber-700/90 mt-1">Akumulasi uang kas yang belum diterima kas kelas</p>
       </div>
     </div>
 
     <!-- Tabel Rincian Anggota Penunggak -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-        <h2 class="font-bold text-slate-900 text-base">Rincian Anggota & Periode Menunggak</h2>
-        <span class="text-xs text-slate-500 font-medium">Diurutkan dari tunggakan terbesar</span>
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="font-bold text-slate-900 text-base">Rincian Anggota & Periode Menunggak</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Diurutkan otomatis dari akumulasi tunggakan terbesar</p>
+        </div>
       </div>
 
       {#if overdueData.penunggak.length === 0}
-        <div class="p-12 text-center text-slate-400">
-          <div class="text-3xl mb-2">🎉</div>
-          <div class="font-bold text-slate-700">Luar biasa! Tidak ada anggota yang menunggak.</div>
-          <div class="text-xs text-slate-500 mt-1">Semua anggota kelas telah melunasi iuran yang jatuh tempo.</div>
+        <div class="p-12 text-center">
+          <EmptyState
+            title="Luar biasa! Tidak ada anggota yang menunggak"
+            description="Semua anggota kelas telah tertib melunasi tagihan iuran kas yang telah jatuh tempo."
+            icon={CheckCircle2}
+          />
         </div>
       {:else}
         <div class="divide-y divide-slate-100">
           {#each overdueData.penunggak as p, idx}
             <div class="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/70 transition">
-              <div class="space-y-1.5 flex-1">
-                <div class="flex items-center gap-2.5">
-                  <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center">
+              <div class="space-y-2 flex-1 min-w-0">
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center">
                     {idx + 1}
                   </span>
                   <span class="font-bold text-slate-900 text-base">{p.nama}</span>
+                  
                   {#if p.kontak}
                     <a
-                      href="https://wa.me/{p.kontak.replace(/^0/, '62')}"
+                      href={getWhatsAppUrl(p)}
                       target="_blank"
                       rel="noreferrer"
-                      class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md hover:bg-emerald-100 transition"
-                      title="Kirim pengingat WhatsApp"
+                      class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-lg hover:bg-emerald-100 transition"
+                      title="Kirim pengingat ramah via WhatsApp"
                     >
-                      <span>💬 {p.kontak}</span>
+                      <MessageCircle class="w-3.5 h-3.5" />
+                      <span>Ingatkan WA</span>
                     </a>
                   {/if}
                 </div>
 
                 <!-- Rincian Periode yang Menunggak -->
-                <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span class="text-xs text-slate-500">Periode terlambat:</span>
+                <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  <span class="text-xs text-slate-400 font-medium">Periode tertunggak:</span>
                   {#each p.rincian as r}
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded text-xs font-semibold">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-xs font-bold">
                       <span>{formatPeriode(r.periode)}</span>
-                      <span class="text-[10px] text-rose-500">({r.hari_terlambat} hr)</span>
+                      <span class="text-[10px] text-rose-500 font-normal">({r.hari_terlambat} hari lewat)</span>
                     </span>
                   {/each}
                 </div>
               </div>
 
               <!-- Total Tunggakan Anggota & Aksi -->
-              <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
-                <div class="text-right">
-                  <div class="text-xs font-semibold text-slate-400">Total Tunggakan ({p.jumlah_tunggakan} bulan)</div>
-                  <div class="text-lg font-extrabold text-rose-600">{formatRupiah(p.total_tunggakan)}</div>
+              <div class="flex items-center justify-between md:justify-end gap-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                <div class="text-left md:text-right">
+                  <div class="text-xs font-semibold text-slate-400">Total ({p.jumlah_tunggakan} bulan)</div>
+                  <div class="text-lg font-extrabold text-rose-600 tabular-nums">{formatRupiah(p.total_tunggakan)}</div>
                 </div>
 
-                <a
-                  href="/iuran"
-                  class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition"
-                >
-                  Kelola Iuran &rarr;
+                <a href="/iuran">
+                  <Button variant="secondary" size="sm">
+                    <span>Kelola Iuran</span>
+                    <ChevronRight class="w-3.5 h-3.5 ml-1" />
+                  </Button>
                 </a>
               </div>
             </div>
@@ -153,4 +177,3 @@
     </div>
   {/if}
 </div>
-

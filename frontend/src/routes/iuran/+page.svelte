@@ -2,13 +2,29 @@
   import { onMount } from "svelte";
   import { api } from "$lib/api.js";
   import { auth } from "$lib/stores/auth.js";
+  import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatTanggal, formatPeriode } from "$lib/utils/format.js";
+  import PageHeader from "$lib/components/PageHeader.svelte";
+  import Card from "$lib/components/Card.svelte";
+  import Button from "$lib/components/Button.svelte";
+  import Badge from "$lib/components/Badge.svelte";
+  import Modal from "$lib/components/Modal.svelte";
+  import EmptyState from "$lib/components/EmptyState.svelte";
+  import {
+    CalendarClock,
+    Zap,
+    CheckCircle2,
+    AlertTriangle,
+    Clock,
+    Filter,
+    Calendar,
+    RotateCcw
+  } from "lucide-svelte";
 
   let currentUser = $state(null);
   let dues = $state([]);
   let isLoading = $state(true);
   let errorMessage = $state("");
-  let successMessage = $state("");
 
   // Filter bendahara
   let selectedPeriode = $state("");
@@ -21,13 +37,17 @@
   let genJatuhTempo = $state("2026-11-10");
   let isGenerating = $state(false);
 
+  // Modal Pelunasan (Bendahara)
+  let isPayModalOpen = $state(false);
+  let dueToPay = $state(null);
+  let isPaying = $state(false);
+
   $effect(() => {
     const unsub = auth.subscribe((s) => (currentUser = s.user));
     return unsub;
   });
 
   onMount(async () => {
-    // Ambil default periode bulan ini jika ada
     const now = new Date();
     const currYear = now.getFullYear();
     const currMonth = String(now.getMonth() + 1).padStart(2, "0");
@@ -48,6 +68,7 @@
       dues = res.data || [];
     } catch (err) {
       errorMessage = err.message || "Gagal memuat data iuran";
+      toast.error(errorMessage);
     } finally {
       isLoading = false;
     }
@@ -62,26 +83,30 @@
     loadDues();
   }
 
-  async function handleMarkPaid(due) {
-    const confirmPay = window.confirm(
-      `Tandai lunas iuran periode ${due.periode} untuk "${due.nama_anggota}" sebesar ${formatRupiah(due.nominal)}?\nTransaksi kas pemasukan akan dibuat otomatis.`
-    );
-    if (!confirmPay) return;
+  function openPayModal(due) {
+    dueToPay = due;
+    isPayModalOpen = true;
+  }
 
+  async function confirmPay() {
+    if (!dueToPay) return;
+    isPaying = true;
     try {
-      await api.post(`dues/${due.id}/pay`, {});
-      successMessage = `Iuran "${due.nama_anggota}" berhasil ditandai lunas dan transaksi kas telah tercatat.`;
-      setTimeout(() => (successMessage = ""), 4000);
+      await api.post(`dues/${dueToPay.id}/pay`, {});
+      toast.success(`Iuran "${dueToPay.nama_anggota}" periode ${dueToPay.periode} berhasil dilunasi & kas tercatat.`);
+      isPayModalOpen = false;
+      dueToPay = null;
       loadDues();
     } catch (err) {
-      errorMessage = err.message || "Gagal menandai lunas iuran";
+      toast.error(err.message || "Gagal menandai lunas iuran");
+    } finally {
+      isPaying = false;
     }
   }
 
   async function handleGenerateSubmit(e) {
     e.preventDefault();
     isGenerating = true;
-    errorMessage = "";
     try {
       const res = await api.post("dues/generate", {
         periode: genPeriode,
@@ -89,13 +114,12 @@
         jatuh_tempo: genJatuhTempo
       });
 
-      successMessage = `Berhasil membuat ${res.generated} tagihan baru untuk periode ${res.periode} (${res.skipped} anggota sudah memiliki tagihan).`;
+      toast.success(`Berhasil membuat ${res.generated} tagihan baru untuk periode ${res.periode}`);
       isGenerateModalOpen = false;
       selectedPeriode = genPeriode;
       loadDues();
-      setTimeout(() => (successMessage = ""), 5000);
     } catch (err) {
-      errorMessage = err.message || "Gagal membuat tagihan iuran";
+      toast.error(err.message || "Gagal membuat tagihan iuran");
     } finally {
       isGenerating = false;
     }
@@ -106,112 +130,99 @@
   <title>Iuran Kas - KasPintar</title>
 </svelte:head>
 
-<div class="space-y-5">
+<div class="space-y-6">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
-        {currentUser?.role === 'bendahara' ? 'Kelola Iuran Kas Kelas' : 'Riwayat Iuran Kas Saya'}
-      </h1>
-      <p class="text-slate-500 text-sm">
-        {currentUser?.role === 'bendahara' ? 'Pantau status pembayaran iuran seluruh anggota per periode.' : 'Catatan pembayaran dan pengingat tagihan iuran kas milikmu.'}
-      </p>
-    </div>
+  <PageHeader
+    title={currentUser?.role === 'bendahara' ? 'Kelola Iuran Kas Kelas' : 'Riwayat Iuran Kas Saya'}
+    description={currentUser?.role === 'bendahara' ? 'Pantau status pembayaran iuran seluruh anggota per periode.' : 'Catatan pembayaran dan pengingat tagihan iuran kas kelas milikmu.'}
+    icon={CalendarClock}
+  >
     {#if currentUser?.role === "bendahara"}
-      <button
-        onclick={() => (isGenerateModalOpen = true)}
-        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm transition"
-      >
-        <span>⚡</span> Buat Tagihan Periode Baru
-      </button>
+      <Button variant="primary" size="md" onclick={() => (isGenerateModalOpen = true)}>
+        <Zap class="w-4 h-4 mr-1.5" />
+        <span>Buat Tagihan Periode</span>
+      </Button>
     {/if}
-  </div>
-
-  {#if successMessage}
-    <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm">
-      ✅ {successMessage}
-    </div>
-  {/if}
-
-  {#if errorMessage}
-    <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm flex items-center justify-between">
-      <span>⚠️ {errorMessage}</span>
-      <button onclick={() => (errorMessage = "")} class="text-xs font-bold">&times;</button>
-    </div>
-  {/if}
+  </PageHeader>
 
   <!-- Panel Filter Periode -->
-  <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center gap-3">
-    <div class="flex items-center gap-2 w-full sm:w-auto">
-      <label for="periode" class="text-xs font-bold text-slate-600 uppercase shrink-0">Periode:</label>
+  <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+    <div class="flex flex-wrap items-center gap-2.5">
+      <label for="periode" class="text-xs font-bold text-slate-700 uppercase tracking-wider shrink-0">
+        Periode:
+      </label>
       <input
         id="periode"
         type="month"
         bind:value={selectedPeriode}
         onchange={handleFilterChange}
-        class="px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+        class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
       />
       {#if selectedPeriode}
-        <button
-          onclick={handleShowAllPeriode}
-          class="text-xs text-indigo-600 hover:underline font-semibold shrink-0"
-        >
-          Lihat Semua Periode
-        </button>
+        <Button variant="ghost" size="sm" onclick={handleShowAllPeriode}>
+          <RotateCcw class="w-3.5 h-3.5 mr-1" />
+          <span>Semua Periode</span>
+        </Button>
       {/if}
     </div>
 
-    <div class="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-      <label for="status" class="text-xs font-bold text-slate-600 uppercase shrink-0">Status:</label>
+    <div class="flex items-center gap-2.5">
+      <label for="status" class="text-xs font-bold text-slate-700 uppercase tracking-wider shrink-0">
+        Status:
+      </label>
       <select
         id="status"
         bind:value={filterStatus}
         onchange={handleFilterChange}
-        class="w-full sm:w-40 px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition min-w-[140px]"
       >
         <option value="">Semua Status</option>
         <option value="belum">Belum Lunas</option>
-        <option value="lunas">Lunas</option>
+        <option value="lunas">Sudah Lunas</option>
       </select>
     </div>
   </div>
 
   <!-- Tabel Iuran -->
-  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm text-slate-600">
-        <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold tracking-wider border-b border-slate-100">
+      <table class="w-full text-left text-sm text-slate-600 border-collapse">
+        <thead class="bg-slate-50/80 text-slate-700 text-xs uppercase font-bold tracking-wider border-b border-slate-200/60">
           <tr>
-            <th class="py-3.5 px-4">Periode</th>
+            <th class="py-3.5 px-4 font-bold">Periode</th>
             {#if currentUser?.role === "bendahara"}
-              <th class="py-3.5 px-4">Anggota</th>
+              <th class="py-3.5 px-4 font-bold">Anggota</th>
             {/if}
-            <th class="py-3.5 px-4">Nominal</th>
-            <th class="py-3.5 px-4">Jatuh Tempo</th>
-            <th class="py-3.5 px-4">Status & Keterangan</th>
-            <th class="py-3.5 px-4">Tanggal Bayar</th>
+            <th class="py-3.5 px-4 font-bold">Nominal</th>
+            <th class="py-3.5 px-4 font-bold">Jatuh Tempo</th>
+            <th class="py-3.5 px-4 font-bold">Status</th>
+            <th class="py-3.5 px-4 font-bold">Tanggal Bayar</th>
             {#if currentUser?.role === "bendahara"}
-              <th class="py-3.5 px-4 text-center">Aksi Pelunasan</th>
+              <th class="py-3.5 px-4 font-bold text-center">Aksi Pelunasan</th>
             {/if}
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           {#if isLoading}
             <tr>
-              <td colspan={currentUser?.role === 'bendahara' ? 7 : 5} class="p-8 text-center text-slate-400">
-                <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-indigo-600 border-t-transparent"></div>
-                <div class="mt-2 text-xs">Memuat data iuran...</div>
+              <td colspan={currentUser?.role === 'bendahara' ? 7 : 5} class="p-12 text-center text-slate-400">
+                <div class="inline-block animate-spin rounded-full h-7 w-7 border-2 border-teal-700 border-t-transparent"></div>
+                <div class="mt-2 text-xs font-medium">Memuat data iuran...</div>
               </td>
             </tr>
           {:else if dues.length === 0}
             <tr>
-              <td colspan={currentUser?.role === 'bendahara' ? 7 : 5} class="p-8 text-center text-slate-400">
-                Tidak ada data tagihan iuran pada periode ini
+              <td colspan={currentUser?.role === 'bendahara' ? 7 : 5} class="p-12 text-center">
+                <EmptyState
+                  title="Tidak ada tagihan iuran pada periode ini"
+                  description={currentUser?.role === 'bendahara' ? "Klik tombol 'Buat Tagihan Periode' untuk membuat tagihan iuran massal bagi anggota kelas aktif." : "Kamu belum memiliki tagihan iuran pada filter periode yang dipilih."}
+                  icon={CalendarClock}
+                />
               </td>
             </tr>
           {:else}
             {#each dues as due}
-              <tr class="hover:bg-slate-50/70 transition">
+              <tr class="hover:bg-slate-50/70 transition duration-75">
                 <td class="py-3.5 px-4 whitespace-nowrap font-bold text-slate-800">
                   {formatPeriode(due.periode)}
                 </td>
@@ -220,25 +231,28 @@
                     {due.nama_anggota || "-"}
                   </td>
                 {/if}
-                <td class="py-3.5 px-4 whitespace-nowrap font-semibold text-slate-800">
+                <td class="py-3.5 px-4 whitespace-nowrap font-bold text-slate-800 tabular-nums">
                   {formatRupiah(due.nominal)}
                 </td>
-                <td class="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600">
+                <td class="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600 font-medium">
                   {formatTanggal(due.jatuh_tempo)}
                 </td>
                 <td class="py-3.5 px-4 whitespace-nowrap">
                   {#if due.status === "lunas"}
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span>✓ Lunas</span>
-                    </span>
+                    <Badge variant="success" size="sm">
+                      <CheckCircle2 class="w-3.5 h-3.5 mr-1" />
+                      <span>Lunas</span>
+                    </Badge>
                   {:else if due.terlambat}
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                      <span>⚠️ Terlambat ({due.hari_terlambat} hari)</span>
-                    </span>
+                    <Badge variant="danger" size="sm">
+                      <AlertTriangle class="w-3.5 h-3.5 mr-1" />
+                      <span>Terlambat ({due.hari_terlambat} hr)</span>
+                    </Badge>
                   {:else}
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                      <span>Belum Bayar (Sisa {due.sisa_hari} hari)</span>
-                    </span>
+                    <Badge variant="amber" size="sm">
+                      <Clock class="w-3.5 h-3.5 mr-1" />
+                      <span>Belum Bayar (Sisa {due.sisa_hari} hr)</span>
+                    </Badge>
                   {/if}
                 </td>
                 <td class="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500">
@@ -247,14 +261,15 @@
                 {#if currentUser?.role === "bendahara"}
                   <td class="py-3.5 px-4 whitespace-nowrap text-center">
                     {#if due.status === "belum"}
-                      <button
-                        onclick={() => handleMarkPaid(due)}
-                        class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-sm transition"
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onclick={() => openPayModal(due)}
                       >
-                        Tandai Lunas
-                      </button>
+                        <span>Tandai Lunas</span>
+                      </Button>
                     {:else}
-                      <span class="text-xs text-slate-400 font-medium">Selesai</span>
+                      <span class="text-xs text-slate-400 font-semibold">Tercatat</span>
                     {/if}
                   </td>
                 {/if}
@@ -267,84 +282,92 @@
   </div>
 </div>
 
-<!-- Modal Generate Tagihan (Bendahara) -->
-{#if isGenerateModalOpen}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 p-6 space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="font-bold text-lg text-slate-900">Buat Tagihan Iuran Massal</h3>
-        <button onclick={() => (isGenerateModalOpen = false)} class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+<!-- Modal Pelunasan Iuran -->
+<Modal
+  open={isPayModalOpen}
+  title="Konfirmasi Pelunasan Iuran"
+  confirmText="Ya, Tandai Lunas"
+  cancelText="Batal"
+  confirmVariant="primary"
+  loading={isPaying}
+  onclose={() => (isPayModalOpen = false)}
+  onconfirm={confirmPay}
+>
+  {#if dueToPay}
+    <p class="text-sm text-slate-600">
+      Tandai lunas iuran untuk anggota:
+    </p>
+    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-sm">
+      <div class="font-bold text-slate-900">{dueToPay.nama_anggota}</div>
+      <div class="text-xs text-slate-500 flex items-center justify-between">
+        <span>Periode: <strong>{formatPeriode(dueToPay.periode)}</strong></span>
+        <span class="font-bold text-teal-800 text-sm tabular-nums">{formatRupiah(dueToPay.nominal)}</span>
       </div>
-
-      <p class="text-xs text-slate-500">
-        Tagihan iuran akan dibuatkan secara otomatis untuk <strong>semua anggota kelas yang berstatus aktif</strong>. Anggota yang sudah memiliki tagihan di periode yang sama tidak akan diduplikasi.
-      </p>
-
-      <form onsubmit={handleGenerateSubmit} class="space-y-4">
-        <div>
-          <label for="genPeriode" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-            Periode Tagihan (Bulan & Tahun)
-          </label>
-          <input
-            id="genPeriode"
-            type="month"
-            bind:value={genPeriode}
-            required
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label for="genNominal" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-            Nominal Iuran (Rupiah)
-          </label>
-          <input
-            id="genNominal"
-            type="number"
-            bind:value={genNominal}
-            min="1000"
-            step="1000"
-            required
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
-          />
-        </div>
-
-        <div>
-          <label for="genJatuhTempo" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-            Batas Tanggal Jatuh Tempo
-          </label>
-          <input
-            id="genJatuhTempo"
-            type="date"
-            bind:value={genJatuhTempo}
-            required
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
-          <button
-            type="button"
-            onclick={() => (isGenerateModalOpen = false)}
-            class="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-sm rounded-xl transition"
-          >
-            Batal
-          </button>
-          <button
-            type="submit"
-            disabled={isGenerating}
-            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition disabled:opacity-50 flex items-center gap-2"
-          >
-            {#if isGenerating}
-              <div class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Memproses...</span>
-            {:else}
-              <span>Generate Tagihan</span>
-            {/if}
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
-{/if}
+    <p class="text-xs text-slate-500">
+      Sistem akan otomatis mencatat mutasi <strong>Kas Masuk</strong> ke dalam pembukuan kas kelas secara real-time.
+    </p>
+  {/if}
+</Modal>
 
+<!-- Modal Generate Tagihan Massal -->
+<Modal
+  open={isGenerateModalOpen}
+  title="Buat Tagihan Iuran Massal"
+  confirmText="Generate Tagihan"
+  cancelText="Batal"
+  confirmVariant="primary"
+  loading={isGenerating}
+  onclose={() => (isGenerateModalOpen = false)}
+  onconfirm={handleGenerateSubmit}
+>
+  <form id="genForm" onsubmit={handleGenerateSubmit} class="space-y-4">
+    <p class="text-xs text-slate-500">
+      Tagihan akan dibuat otomatis untuk <strong>seluruh anggota kelas berstatus aktif</strong>. Anggota yang sudah memiliki tagihan pada periode ini tidak akan diduplikasi.
+    </p>
+
+    <div class="space-y-1.5">
+      <label for="genPeriode" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+        Periode Tagihan
+      </label>
+      <input
+        id="genPeriode"
+        type="month"
+        bind:value={genPeriode}
+        required
+        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="genNominal" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+        Nominal Iuran (Rupiah)
+      </label>
+      <div class="relative">
+        <span class="absolute left-3.5 top-2.5 text-slate-400 text-sm font-semibold">Rp</span>
+        <input
+          id="genNominal"
+          type="number"
+          bind:value={genNominal}
+          min="1000"
+          step="1000"
+          required
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold tabular-nums focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700"
+        />
+      </div>
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="genJatuhTempo" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+        Batas Jatuh Tempo
+      </label>
+      <input
+        id="genJatuhTempo"
+        type="date"
+        bind:value={genJatuhTempo}
+        required
+        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700"
+      />
+    </div>
+  </form>
+</Modal>

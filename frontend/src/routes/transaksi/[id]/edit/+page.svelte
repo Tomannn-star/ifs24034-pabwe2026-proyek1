@@ -3,6 +3,16 @@
   import { page } from "$app/state";
   import { api } from "$lib/api.js";
   import { goto } from "$app/navigation";
+  import { toast } from "$lib/stores/toast.js";
+  import PageHeader from "$lib/components/PageHeader.svelte";
+  import Card from "$lib/components/Card.svelte";
+  import Button from "$lib/components/Button.svelte";
+  import {
+    Pencil,
+    ArrowLeft,
+    ArrowDownLeft,
+    ArrowUpRight
+  } from "lucide-svelte";
 
   const txId = page.params.id;
 
@@ -45,6 +55,7 @@
       }
     } catch (err) {
       errorMessage = err.message || "Gagal memuat detail transaksi";
+      toast.error(errorMessage);
     } finally {
       isLoading = false;
     }
@@ -56,12 +67,14 @@
 
     const nominal = parseInt(jumlah, 10);
     if (isNaN(nominal) || nominal <= 0) {
-      errorMessage = "Jumlah transaksi harus berupa bilangan bulat positif lebih dari 0";
+      errorMessage = "Jumlah transaksi harus berupa angka bulat positif (Rp)";
+      toast.error(errorMessage);
       return;
     }
 
     if (!category_id) {
       errorMessage = "Kategori transaksi wajib dipilih";
+      toast.error(errorMessage);
       return;
     }
 
@@ -76,9 +89,11 @@
         keterangan: keterangan.trim()
       });
 
+      toast.success("Catatan transaksi berhasil diperbarui");
       goto("/transaksi");
     } catch (err) {
       errorMessage = err.message || "Gagal memperbarui transaksi";
+      toast.error(errorMessage);
     } finally {
       isSubmitting = false;
     }
@@ -89,58 +104,56 @@
   <title>Edit Transaksi - KasPintar</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto space-y-5">
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Edit Transaksi #{txId}</h1>
-      <p class="text-slate-500 text-sm">Perbarui informasi pencatatan kas kelas.</p>
-    </div>
-    <a href="/transaksi" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
-      &larr; Kembali
+<div class="max-w-2xl mx-auto space-y-6">
+  <PageHeader
+    title="Edit Transaksi #{txId}"
+    description="Perbarui informasi pencatatan kas kelas."
+    icon={Pencil}
+  >
+    <a href="/transaksi">
+      <Button variant="secondary" size="sm">
+        <ArrowLeft class="w-4 h-4 mr-1.5" />
+        <span>Kembali</span>
+      </Button>
     </a>
-  </div>
-
-  {#if errorMessage}
-    <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm flex items-center justify-between">
-      <span>⚠️ {errorMessage}</span>
-      <button onclick={() => (errorMessage = "")} class="text-xs font-bold">&times;</button>
-    </div>
-  {/if}
+  </PageHeader>
 
   {#if isLoading}
-    <div class="p-12 text-center text-slate-400">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+    <div class="p-16 text-center text-slate-400">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-3 border-teal-700 border-t-transparent"></div>
       <p class="mt-2 text-sm">Memuat data transaksi...</p>
     </div>
   {:else}
-    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm">
+    <Card>
       <form onsubmit={handleSubmit} class="space-y-5">
         <!-- Jenis Transaksi -->
         <div>
-          <span class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+          <span class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
             Jenis Transaksi
           </span>
           <div class="grid grid-cols-2 gap-3">
             <label
-              class="flex items-center justify-center gap-2 p-3 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'masuk' ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
+              class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'masuk' ? 'bg-teal-50 border-teal-600 text-teal-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
             >
               <input type="radio" name="jenis" value="masuk" bind:group={jenis} class="sr-only" />
-              <span>📥 Kas Masuk</span>
+              <ArrowDownLeft class="w-4 h-4 {jenis === 'masuk' ? 'text-teal-700' : 'text-slate-400'}" />
+              <span>Kas Masuk</span>
             </label>
 
             <label
-              class="flex items-center justify-center gap-2 p-3 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'keluar' ? 'bg-rose-50 border-rose-500 text-rose-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
+              class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'keluar' ? 'bg-rose-50 border-rose-500 text-rose-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
             >
               <input type="radio" name="jenis" value="keluar" bind:group={jenis} class="sr-only" />
-              <span>📤 Kas Keluar</span>
+              <ArrowUpRight class="w-4 h-4 {jenis === 'keluar' ? 'text-rose-600' : 'text-slate-400'}" />
+              <span>Kas Keluar</span>
             </label>
           </div>
         </div>
 
         <!-- Tanggal & Jumlah -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="tanggal" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+          <div class="space-y-1.5">
+            <label for="tanggal" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Tanggal Transaksi
             </label>
             <input
@@ -148,16 +161,16 @@
               type="date"
               bind:value={tanggal}
               required
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
             />
           </div>
 
-          <div>
-            <label for="jumlah" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+          <div class="space-y-1.5">
+            <label for="jumlah" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Jumlah Uang (Rupiah)
             </label>
             <div class="relative">
-              <span class="absolute left-3.5 top-2.5 text-slate-400 text-sm font-semibold">Rp</span>
+              <span class="absolute left-3.5 top-2.5 text-slate-400 text-sm font-semibold select-none">Rp</span>
               <input
                 id="jumlah"
                 type="number"
@@ -165,7 +178,7 @@
                 min="1"
                 step="1"
                 required
-                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 font-bold tabular-nums transition"
               />
             </div>
           </div>
@@ -173,15 +186,15 @@
 
         <!-- Kategori & Anggota -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="category" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-              Kategori ({jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran'})
+          <div class="space-y-1.5">
+            <label for="category" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Pos Kategori ({jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran'})
             </label>
             <select
               id="category"
               bind:value={category_id}
               required
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
             >
               {#each filteredCategories as cat}
                 <option value={String(cat.id)}>{cat.nama}</option>
@@ -189,14 +202,14 @@
             </select>
           </div>
 
-          <div>
-            <label for="member" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-              Terkait Anggota (Opsional)
+          <div class="space-y-1.5">
+            <label for="member" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Anggota Terkait (Opsional)
             </label>
             <select
               id="member"
               bind:value={member_id}
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
             >
               <option value="">-- Tanpa Anggota Khusus --</option>
               {#each members as m}
@@ -207,41 +220,35 @@
         </div>
 
         <!-- Keterangan Transaksi -->
-        <div>
-          <label for="keterangan" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+        <div class="space-y-1.5">
+          <label for="keterangan" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
             Keterangan Transaksi
           </label>
           <textarea
             id="keterangan"
             bind:value={keterangan}
             rows="3"
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
           ></textarea>
         </div>
 
-        <!-- Tombol Simpan -->
-        <div class="pt-2 flex items-center justify-end gap-3">
-          <a
-            href="/transaksi"
-            class="px-5 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-sm rounded-xl transition"
-          >
-            Batal
+        <!-- Actions -->
+        <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
+          <a href="/transaksi">
+            <Button variant="secondary" size="md">
+              Batal
+            </Button>
           </a>
-          <button
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition disabled:opacity-50 flex items-center gap-2"
+            variant="primary"
+            size="md"
+            loading={isSubmitting}
           >
-            {#if isSubmitting}
-              <div class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Menyimpan...</span>
-            {:else}
-              <span>Perbarui Transaksi</span>
-            {/if}
-          </button>
+            <span>Perbarui Transaksi</span>
+          </Button>
         </div>
       </form>
-    </div>
+    </Card>
   {/if}
 </div>
-

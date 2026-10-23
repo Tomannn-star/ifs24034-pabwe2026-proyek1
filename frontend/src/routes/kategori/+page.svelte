@@ -1,11 +1,24 @@
 <script>
   import { onMount } from "svelte";
   import { api } from "$lib/api.js";
+  import { toast } from "$lib/stores/toast.js";
+  import PageHeader from "$lib/components/PageHeader.svelte";
+  import Card from "$lib/components/Card.svelte";
+  import Button from "$lib/components/Button.svelte";
+  import Badge from "$lib/components/Badge.svelte";
+  import Modal from "$lib/components/Modal.svelte";
+  import EmptyState from "$lib/components/EmptyState.svelte";
+  import {
+    Tag,
+    Plus,
+    Pencil,
+    Trash2,
+    ArrowDownLeft,
+    ArrowUpRight
+  } from "lucide-svelte";
 
   let categories = $state([]);
   let isLoading = $state(true);
-  let errorMessage = $state("");
-  let successMessage = $state("");
 
   // Form state
   let isEditing = $state(false);
@@ -14,18 +27,22 @@
   let jenis = $state("masuk");
   let isSaving = $state(false);
 
+  // Modal konfirmasi hapus
+  let isDeleteModalOpen = $state(false);
+  let categoryToDelete = $state(null);
+  let isDeleting = $state(false);
+
   onMount(() => {
     loadCategories();
   });
 
   async function loadCategories() {
     isLoading = true;
-    errorMessage = "";
     try {
       const res = await api.get("categories");
       categories = res.data || [];
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat kategori";
+      toast.error(err.message || "Gagal memuat kategori kas");
     } finally {
       isLoading = false;
     }
@@ -49,48 +66,53 @@
   async function handleSubmit(e) {
     e.preventDefault();
     if (!nama.trim()) {
-      errorMessage = "Nama kategori tidak boleh kosong";
+      toast.error("Nama pos kategori wajib diisi");
       return;
     }
 
     isSaving = true;
-    errorMessage = "";
     try {
       if (isEditing) {
         await api.put(`categories/${editId}`, {
           nama: nama.trim(),
           jenis
         });
-        successMessage = "Kategori berhasil diperbarui";
+        toast.success(`Kategori "${nama.trim()}" berhasil diperbarui`);
       } else {
         await api.post("categories", {
           nama: nama.trim(),
           jenis
         });
-        successMessage = "Kategori baru berhasil ditambahkan";
+        toast.success(`Kategori baru "${nama.trim()}" berhasil ditambahkan`);
       }
 
       cancelEdit();
       loadCategories();
-      setTimeout(() => (successMessage = ""), 3000);
     } catch (err) {
-      errorMessage = err.message || "Gagal menyimpan kategori";
+      toast.error(err.message || "Gagal menyimpan kategori");
     } finally {
       isSaving = false;
     }
   }
 
-  async function handleDelete(cat) {
-    const confirmDelete = window.confirm(`Apakah kamu yakin ingin menghapus kategori "${cat.nama}"?`);
-    if (!confirmDelete) return;
+  function promptDelete(cat) {
+    categoryToDelete = cat;
+    isDeleteModalOpen = true;
+  }
 
+  async function confirmDelete() {
+    if (!categoryToDelete) return;
+    isDeleting = true;
     try {
-      await api.delete(`categories/${cat.id}`);
-      successMessage = `Kategori "${cat.nama}" berhasil dihapus`;
-      setTimeout(() => (successMessage = ""), 3000);
+      await api.delete(`categories/${categoryToDelete.id}`);
+      toast.success(`Kategori "${categoryToDelete.nama}" berhasil dihapus`);
+      isDeleteModalOpen = false;
+      categoryToDelete = null;
       loadCategories();
     } catch (err) {
-      errorMessage = err.message || "Gagal menghapus kategori";
+      toast.error(err.message || "Gagal menghapus kategori");
+    } finally {
+      isDeleting = false;
     }
   }
 </script>
@@ -101,135 +123,152 @@
 
 <div class="space-y-6">
   <!-- Header -->
-  <div>
-    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Kelola Kategori Kas</h1>
-    <p class="text-slate-500 text-sm">Atur klasifikasi pos transaksi pemasukan dan pengeluaran kas kelas.</p>
-  </div>
+  <PageHeader
+    title="Kelola Pos Kategori Kas"
+    description="Atur klasifikasi pos transaksi kas masuk dan kas keluar kas kelas."
+    icon={Tag}
+  />
 
-  {#if successMessage}
-    <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm">
-      ✅ {successMessage}
-    </div>
-  {/if}
-
-  {#if errorMessage}
-    <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm flex items-center justify-between">
-      <span>⚠️ {errorMessage}</span>
-      <button onclick={() => (errorMessage = "")} class="text-xs font-bold">&times;</button>
-    </div>
-  {/if}
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Form Tambah / Edit Kategori -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm h-fit">
-      <h2 class="font-bold text-slate-900 text-base mb-4">
-        {isEditing ? 'Edit Kategori' : 'Tambah Kategori Baru'}
-      </h2>
-
-      <form onsubmit={handleSubmit} class="space-y-4">
-        <div>
-          <label for="namaKategori" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-            Nama Kategori
-          </label>
-          <input
-            id="namaKategori"
-            type="text"
-            bind:value={nama}
-            placeholder="Contoh: Dana Perlengkapan"
-            required
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Form Tambah / Edit Kategori (4 Kolom di Desktop) -->
+    <div class="lg:col-span-5 h-fit">
+      <Card>
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+            {#if isEditing}
+              <Pencil class="w-4 h-4" />
+            {:else}
+              <Plus class="w-4 h-4" />
+            {/if}
+          </div>
+          <h2 class="font-bold text-slate-900 text-base">
+            {isEditing ? 'Edit Kategori' : 'Tambah Kategori Baru'}
+          </h2>
         </div>
 
-        <div>
-          <label for="jenisKategori" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-            Jenis Kategori
-          </label>
-          <select
-            id="jenisKategori"
-            bind:value={jenis}
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="masuk">Pemasukan (Kas Masuk)</option>
-            <option value="keluar">Pengeluaran (Kas Keluar)</option>
-          </select>
-        </div>
+        <form onsubmit={handleSubmit} class="space-y-4">
+          <div class="space-y-1.5">
+            <label for="namaKategori" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Nama Pos Kategori
+            </label>
+            <input
+              id="namaKategori"
+              type="text"
+              bind:value={nama}
+              placeholder="Contoh: Dana Perlengkapan Kelas"
+              required
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
+            />
+          </div>
 
-        <div class="pt-2 flex items-center gap-2">
-          {#if isEditing}
-            <button
-              type="button"
-              onclick={cancelEdit}
-              class="w-1/2 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-sm rounded-xl transition"
+          <div class="space-y-1.5">
+            <label for="jenisKategori" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              Klasifikasi Jenis
+            </label>
+            <select
+              id="jenisKategori"
+              bind:value={jenis}
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
             >
-              Batal
-            </button>
-          {/if}
-          <button
-            type="submit"
-            disabled={isSaving}
-            class="{isEditing ? 'w-1/2' : 'w-full'} py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition disabled:opacity-50"
-          >
-            {isSaving ? 'Menyimpan...' : (isEditing ? 'Perbarui' : 'Tambah Kategori')}
-          </button>
-        </div>
-      </form>
+              <option value="masuk">Kas Masuk (Pemasukan)</option>
+              <option value="keluar">Kas Keluar (Pengeluaran)</option>
+            </select>
+          </div>
+
+          <div class="pt-2 flex items-center gap-2">
+            {#if isEditing}
+              <Button variant="secondary" size="md" class="w-1/2" onclick={cancelEdit}>
+                Batal
+              </Button>
+            {/if}
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              loading={isSaving}
+              class={isEditing ? 'w-1/2' : 'w-full'}
+            >
+              <span>{isEditing ? 'Perbarui Kategori' : 'Tambah Kategori'}</span>
+            </Button>
+          </div>
+        </form>
+      </Card>
     </div>
 
-    <!-- Tabel Daftar Kategori -->
-    <div class="md:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-slate-100">
-        <h2 class="font-bold text-slate-900 text-base">Daftar Kategori Terdaftar</h2>
+    <!-- Tabel Daftar Kategori (7 Kolom di Desktop) -->
+    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="font-bold text-slate-900 text-base">Pos Kategori Terdaftar</h2>
+        <span class="text-xs text-slate-400 font-semibold">{categories.length} Pos</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-50 text-slate-700 text-xs uppercase font-bold tracking-wider border-b border-slate-100">
+        <table class="w-full text-left text-sm text-slate-600 border-collapse">
+          <thead class="bg-slate-50/80 text-slate-700 text-xs uppercase font-bold tracking-wider border-b border-slate-200/60">
             <tr>
-              <th class="py-3 px-4">No</th>
-              <th class="py-3 px-4">Nama Kategori</th>
-              <th class="py-3 px-4">Jenis</th>
-              <th class="py-3 px-4 text-center">Aksi</th>
+              <th class="py-3 px-4 font-bold w-12 text-center">No</th>
+              <th class="py-3 px-4 font-bold">Nama Kategori</th>
+              <th class="py-3 px-4 font-bold">Jenis</th>
+              <th class="py-3 px-4 font-bold text-center">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             {#if isLoading}
               <tr>
-                <td colspan="4" class="p-6 text-center text-slate-400">
-                  <div class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-indigo-600 border-t-transparent"></div>
+                <td colspan="4" class="p-8 text-center text-slate-400">
+                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-teal-700 border-t-transparent"></div>
+                  <div class="mt-2 text-xs font-medium">Memuat kategori...</div>
                 </td>
               </tr>
             {:else if categories.length === 0}
               <tr>
-                <td colspan="4" class="p-6 text-center text-slate-400">
-                  Belum ada kategori yang dibuat
+                <td colspan="4" class="p-8 text-center">
+                  <EmptyState
+                    title="Belum ada kategori yang dibuat"
+                    description="Tambahkan pos kategori pemasukan atau pengeluaran kas melalui form di samping."
+                    icon={Tag}
+                  />
                 </td>
               </tr>
             {:else}
               {#each categories as cat, idx}
-                <tr class="hover:bg-slate-50/70 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-400 text-xs">{idx + 1}</td>
-                  <td class="py-3 px-4 font-bold text-slate-800">{cat.nama}</td>
-                  <td class="py-3 px-4">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold {cat.jenis === 'masuk' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
-                      {cat.jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran'}
-                    </span>
+                <tr class="hover:bg-slate-50/70 transition duration-75">
+                  <td class="py-3 px-4 font-semibold text-slate-400 text-xs text-center">
+                    {idx + 1}
                   </td>
-                  <td class="py-3 px-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
+                  <td class="py-3 px-4 font-bold text-slate-900">
+                    {cat.nama}
+                  </td>
+                  <td class="py-3 px-4 whitespace-nowrap">
+                    {#if cat.jenis === 'masuk'}
+                      <Badge variant="success" size="sm">
+                        <ArrowDownLeft class="w-3.5 h-3.5 mr-1" />
+                        <span>Pemasukan</span>
+                      </Badge>
+                    {:else}
+                      <Badge variant="danger" size="sm">
+                        <ArrowUpRight class="w-3.5 h-3.5 mr-1" />
+                        <span>Pengeluaran</span>
+                      </Badge>
+                    {/if}
+                  </td>
+                  <td class="py-3 px-4 text-center whitespace-nowrap">
+                    <div class="flex items-center justify-center gap-1">
                       <button
                         onclick={() => startEdit(cat)}
-                        class="p-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                        class="p-1.5 text-slate-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer"
                         title="Edit Kategori"
+                        aria-label="Edit"
                       >
-                        ✏️
+                        <Pencil class="w-4 h-4" />
                       </button>
                       <button
-                        onclick={() => handleDelete(cat)}
-                        class="p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        onclick={() => promptDelete(cat)}
+                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                         title="Hapus Kategori"
+                        aria-label="Hapus"
                       >
-                        🗑️
+                        <Trash2 class="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -243,3 +282,26 @@
   </div>
 </div>
 
+<!-- Modal Konfirmasi Hapus Kategori -->
+<Modal
+  open={isDeleteModalOpen}
+  title="Konfirmasi Hapus Kategori"
+  confirmText="Ya, Hapus Kategori"
+  cancelText="Batal"
+  confirmVariant="danger"
+  loading={isDeleting}
+  onclose={() => (isDeleteModalOpen = false)}
+  onconfirm={confirmDelete}
+>
+  {#if categoryToDelete}
+    <p class="text-sm text-slate-600">
+      Apakah kamu yakin ingin menghapus pos kategori:
+    </p>
+    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900">
+      {categoryToDelete.nama} ({categoryToDelete.jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran'})
+    </div>
+    <p class="text-xs text-rose-600">
+      Perhatian: Kategori tidak dapat dihapus jika masih ada catatan transaksi yang menggunakan pos ini.
+    </p>
+  {/if}
+</Modal>
