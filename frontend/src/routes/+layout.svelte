@@ -34,16 +34,16 @@
     return unsub;
   });
 
-  // Client-side route guard
+  // Client-side route guard untuk halaman terproteksi & publik
   $effect(() => {
     if (!browser) return;
 
     const path = page.url.pathname;
-    const isLoginPage = path === "/login";
+    const isPublicPage = path.startsWith("/auth/") || path === "/login";
 
-    if (!token && !isLoginPage) {
-      goto("/login");
-    } else if (token && isLoginPage) {
+    if (!token && !isPublicPage) {
+      goto("/auth/login");
+    } else if (token && isPublicPage) {
       goto("/");
     } else if (token && currentUser?.role === "anggota") {
       const bendaharaOnly = ["/anggota", "/penunggak", "/kategori", "/transaksi/baru"];
@@ -77,7 +77,7 @@
 <!-- Komponen Notifikasi Toast Global -->
 <Toast />
 
-{#if page.url.pathname === "/login"}
+{#if page.url.pathname.startsWith("/auth/") || page.url.pathname === "/login"}
   {@render children()}
 {:else}
   <div class="min-h-screen bg-slate-50 text-slate-800 flex">

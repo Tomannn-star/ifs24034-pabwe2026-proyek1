@@ -1,8 +1,26 @@
 import { auth } from "./stores/auth.js";
 import { browser } from "$app/environment";
 
-// URL API diambil dari environment variable PUBLIC_API_URL atau fallback port 5001
-const BASE_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5001/api";
+// Ambil URL API dari environment variable (PUBLIC_API_URL atau VITE_API_URL)
+const envApiUrl = import.meta.env.PUBLIC_API_URL || 
+                  import.meta.env.VITE_API_URL || 
+                  import.meta.env.VITE_PUBLIC_API_URL;
+
+/**
+ * Mendapatkan base URL API secara dinamis:
+ * 1. Mengutamakan env variable jika diset
+ * 2. Jika diakses dari domain Vercel (*.vercel.app), otomatis arahkan ke Vercel backend
+ * 3. Jika di localhost, arahkan ke port 5001
+ */
+export function getBaseUrl() {
+  if (envApiUrl && envApiUrl.trim() !== "") {
+    return envApiUrl.replace(/\/$/, "");
+  }
+  if (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")) {
+    return "https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api";
+  }
+  return "http://localhost:5001/api";
+}
 
 /**
  * Helper request HTTP terpusat untuk KasPintar.
@@ -14,7 +32,8 @@ const BASE_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5001/api";
  * @returns {Promise<any>}
  */
 export async function apiRequest(endpoint, options = {}) {
-  const url = `${BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}/${endpoint.replace(/^\//, "")}`;
 
   let token = null;
   if (browser) {
@@ -37,15 +56,15 @@ export async function apiRequest(endpoint, options = {}) {
       headers
     });
   } catch (err) {
-    // Tangani error jaringan (misal server backend belum dinyalakan)
+    // Tangani error jaringan (misal server backend belum dinyalakan atau tidak dapat dijangkau)
     throw new Error(
-      "Gagal terhubung ke server backend (port 5001). Pastikan server backend sedang berjalan."
+      `Gagal terhubung ke server backend (${baseUrl}). Pastikan server backend sedang aktif.`
     );
   }
 
   // Jika token tidak valid / kedaluwarsa, otomatis logout ke login page
   if (response.status === 401) {
-    if (browser && !window.location.pathname.startsWith("/login")) {
+    if (browser && !window.location.pathname.startsWith("/auth/") && window.location.pathname !== "/login") {
       auth.logout(true);
     }
     const errData = await response.json().catch(() => ({}));

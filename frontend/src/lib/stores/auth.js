@@ -36,7 +36,7 @@ function createAuthStore() {
       }
       set({ token: null, user: null, isLoaded: true });
       if (redirect && browser) {
-        goto("/login");
+        goto("/auth/login");
       }
     },
     updateUser(user) {

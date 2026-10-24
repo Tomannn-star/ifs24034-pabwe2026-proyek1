@@ -1,5 +1,18 @@
 import express from "express";
 import cors from "cors";
+import db from "./db.js";
+import { seed } from "./seed.js";
+
+// Pastikan data awal tersedia (termasuk saat cold start di Vercel Serverless)
+try {
+  const userCount = db.query("SELECT COUNT(*) as count FROM users").get()?.count || 0;
+  if (userCount === 0) {
+    console.log("ℹ️  Database kosong, menjalankan seeder awal...");
+    seed(db);
+  }
+} catch (err) {
+  console.error("Gagal memeriksa seed database:", err);
+}
 
 // Import rute
 import authRouter from "./routes/auth.js";
@@ -26,6 +39,16 @@ app.use(cors({
 
 // Body parser JSON
 app.use(express.json());
+
+// Endpoint Root: Informasi status API KasPintar
+app.get("/", (req, res) => {
+  res.json({
+    status: "online",
+    message: "🚀 KasPintar REST API Server berjalan dengan baik di Vercel!",
+    health: "/api/health",
+    version: "1.0.0"
+  });
+});
 
 // Endpoint Health Check
 app.get("/api/health", (req, res) => {
