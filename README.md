@@ -40,7 +40,7 @@ Proyek ini dibangun menggunakan arsitektur monorepo dengan teknologi mutakhir:
 ## 📂 3. Struktur Direktori Proyek
 
 ```
-kaspintar/
+ifs24034-pabwe2026-proyek1/
 ├── backend/                        # Server REST API Express.js
 │   ├── routes/                     # Modul endpoint REST API
 │   │   ├── auth.js                 # Endpoint login & profil
@@ -168,8 +168,8 @@ bun --version
 
 ### Langkah 1: Kloning Repositori
 ```bash
-git clone <URL_REPOSITORY_ANDA>
-cd PROYEK
+git clone https://github.com/Tomannn-star/ifs24034-pabwe2026-proyek1.git
+cd ifs24034-pabwe2026-proyek1
 ```
 
 ### Langkah 2: Setup Backend
@@ -328,7 +328,9 @@ pipeline {
 ---
 
 ## 👨‍💻 Pengembang
-- **Nama Pengembang**: Mahasiswa PABWE
+- **Nama Pengembang**: Toman Sihombing
+- **NIM**: 11S24034 / ifs24034
 - **Mata Kuliah**: Praktikum Pengembangan Aplikasi Berbasis Web (PABWE)
 - **Tahun**: 2026
+- **Repository**: [GitHub ifs24034-pabwe2026-proyek1](https://github.com/Tomannn-star/ifs24034-pabwe2026-proyek1)
 - **Lisensi**: Proyek Tugas Akademik &mdash; Bebas digunakan untuk keperluan pembelajaran.
