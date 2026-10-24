@@ -12,8 +12,11 @@ import remindersRouter from "./routes/reminders.js";
 
 const app = express();
 
-// Konfigurasi CORS
-const allowedOrigin = process.env.CORS_ORIGIN || "*";
+// Konfigurasi CORS: izinkan domain frontend (Vercel / Localhost)
+const allowedOrigin = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(",").map(o => o.trim()) 
+  : true; // true merefleksikan origin pemanggil sehingga kompatibel dengan credentials
+
 app.use(cors({
   origin: allowedOrigin,
   credentials: true,
