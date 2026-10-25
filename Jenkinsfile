@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Path environment untuk runtime Bun pada Linux / Windows agent
         PATH = "${env.HOME ? env.HOME + '/.bun/bin:' : ''}${env.PATH}"
     }
 
@@ -17,7 +16,7 @@ pipeline {
             steps {
                 script {
                     echo "============================================="
-                    echo "🚀 Pipeline CI/CD KasPintar: Verifikasi Bun"
+                    echo "🚀 Pipeline CI/CD Frontend KasPintar"
                     echo "============================================="
                     if (isUnix()) {
                         sh 'bun --version'
@@ -33,40 +32,11 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    echo "📦 Menginstal dependensi Backend & Frontend..."
+                    echo "📦 Menginstal dependensi Frontend..."
                     if (isUnix()) {
-                        sh '''
-                            cd backend
-                            bun install --frozen-lockfile || bun install
-                            cd ../frontend
-                            bun install --frozen-lockfile || bun install
-                        '''
+                        sh 'bun install --frozen-lockfile || bun install'
                     } else {
-                        bat '''
-                            cd backend
-                            bun install
-                            cd ..\\frontend
-                            bun install
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Test Backend API') {
-            steps {
-                script {
-                    echo "🧪 Menjalankan pengujian otomatis backend KasPintar..."
-                    if (isUnix()) {
-                        sh '''
-                            cd backend
-                            bun test
-                        '''
-                    } else {
-                        bat '''
-                            cd backend
-                            bun test
-                        '''
+                        bat 'bun install'
                     }
                 }
             }
@@ -77,28 +47,22 @@ pipeline {
                 script {
                     echo "🏗️ Membangun build produksi SPA SvelteKit..."
                     if (isUnix()) {
-                        sh '''
-                            cd frontend
-                            bun run build
-                        '''
+                        sh 'bun run build'
                     } else {
-                        bat '''
-                            cd frontend
-                            bun run build
-                        '''
+                        bat 'bun run build'
                     }
                 }
             }
         }
 
-        stage('Verifikasi Hasil Build') {
+        stage('Verifikasi Artefak Build') {
             steps {
                 script {
-                    echo "🔍 Memverifikasi artefak build statis..."
+                    echo "🔍 Memverifikasi artefak build/index.html..."
                     if (isUnix()) {
-                        sh 'test -f frontend/build/index.html && echo "✅ Artefak frontend/build/index.html ditemukan!"'
+                        sh 'test -f build/index.html && echo "✅ Artefak build/index.html ditemukan!"'
                     } else {
-                        bat 'if exist frontend\\build\\index.html (echo Artefak frontend/build/index.html ditemukan!) else (exit 1)'
+                        bat 'if exist build\\index.html (echo Artefak build/index.html ditemukan!) else (exit 1)'
                     }
                 }
             }
@@ -106,20 +70,21 @@ pipeline {
 
         stage('Arsip Artefak') {
             steps {
-                archiveArtifacts artifacts: 'frontend/build/**/*', fingerprint: true, allowEmptyArchive: false
+                archiveArtifacts artifacts: 'build/**/*', fingerprint: true, allowEmptyArchive: false
             }
         }
     }
 
     post {
         always {
-            echo "🏁 Pipeline KasPintar selesai dijalankan."
+            echo "🏁 Pipeline Frontend KasPintar selesai dijalankan."
         }
         success {
-            echo "🎉 SUKSES: Semua pengujian backend lolos dan build frontend berhasil dibangun!"
+            echo "🎉 SUKSES: Build Frontend SPA berhasil dibangun!"
         }
         failure {
-            echo "❌ GAGAL: Terjadi kesalahan pada pipeline. Silakan periksa log di atas."
+            echo "❌ GAGAL: Terjadi kesalahan pada build frontend."
         }
     }
 }
+
