@@ -1,7 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import { auth } from "$lib/stores/auth.js";
-  import { api } from "$lib/api.js";
+  import { authService } from "$lib/services/authService.js";
+  import { validateName, validateUsername, validatePassword, validatePhone } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
   import Button from "$lib/components/Button.svelte";
   import {
@@ -42,35 +44,48 @@
     e.preventDefault();
     errorMessage = "";
 
-    if (!nama.trim() || !username.trim() || !password) {
-      errorMessage = "Nama lengkap, username, dan password wajib diisi";
+    const nameErr = validateName(nama);
+    if (nameErr) {
+      errorMessage = nameErr;
       return;
     }
 
-    if (username.trim().length < 3) {
-      errorMessage = "Username minimal 3 karakter";
+    const usernameErr = validateUsername(username);
+    if (usernameErr) {
+      errorMessage = usernameErr;
       return;
     }
 
-    if (password.length < 6) {
-      errorMessage = "Password minimal 6 karakter";
+    const passwordErr = validatePassword(password);
+    if (passwordErr) {
+      errorMessage = passwordErr;
+      return;
+    }
+
+    const phoneErr = validatePhone(kontak);
+    if (phoneErr) {
+      errorMessage = phoneErr;
       return;
     }
 
     isLoading = true;
     try {
-      const res = await api.post("auth/register", {
-        nama: nama.trim(),
-        username: username.trim(),
+      const res = await authService.register({
+        nama,
+        username,
         password,
-        kontak: kontak.trim() || null,
+        kontak,
         role
       });
 
-      auth.login(res.token, res.user);
+      if (res.token && res.user) {
+        auth.login(res.token, res.user);
+      } else {
+        await authService.login(username, password);
+      }
       goto("/");
     } catch (err) {
-      errorMessage = err.message || "Gagal melakukan registrasi";
+      errorMessage = extractErrorMessage(err, "Gagal melakukan registrasi");
     } finally {
       isLoading = false;
     }

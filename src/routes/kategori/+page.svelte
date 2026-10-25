@@ -1,7 +1,9 @@
 <script>
   import { onMount } from "svelte";
-  import { api } from "$lib/api.js";
+  import { categoryService } from "$lib/services/categoryService.js";
   import { toast } from "$lib/stores/toast.js";
+  import { validateKeterangan } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -39,10 +41,10 @@
   async function loadCategories() {
     isLoading = true;
     try {
-      const res = await api.get("categories");
+      const res = await categoryService.getCategories();
       categories = res.data || [];
     } catch (err) {
-      toast.error(err.message || "Gagal memuat kategori kas");
+      toast.error(extractErrorMessage(err, "Gagal memuat kategori kas"));
     } finally {
       isLoading = false;
     }
@@ -65,21 +67,23 @@
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!nama.trim()) {
-      toast.error("Nama pos kategori wajib diisi");
+
+    const nameErr = validateKeterangan(nama, true);
+    if (nameErr) {
+      toast.error(nameErr);
       return;
     }
 
     isSaving = true;
     try {
       if (isEditing) {
-        await api.put(`categories/${editId}`, {
+        await categoryService.updateCategory(editId, {
           nama: nama.trim(),
           jenis
         });
         toast.success(`Kategori "${nama.trim()}" berhasil diperbarui`);
       } else {
-        await api.post("categories", {
+        await categoryService.createCategory({
           nama: nama.trim(),
           jenis
         });
@@ -89,7 +93,7 @@
       cancelEdit();
       loadCategories();
     } catch (err) {
-      toast.error(err.message || "Gagal menyimpan kategori");
+      toast.error(extractErrorMessage(err, "Gagal menyimpan kategori"));
     } finally {
       isSaving = false;
     }
@@ -104,13 +108,13 @@
     if (!categoryToDelete) return;
     isDeleting = true;
     try {
-      await api.delete(`categories/${categoryToDelete.id}`);
+      await categoryService.deleteCategory(categoryToDelete.id);
       toast.success(`Kategori "${categoryToDelete.nama}" berhasil dihapus`);
       isDeleteModalOpen = false;
       categoryToDelete = null;
       loadCategories();
     } catch (err) {
-      toast.error(err.message || "Gagal menghapus kategori");
+      toast.error(extractErrorMessage(err, "Gagal menghapus kategori"));
     } finally {
       isDeleting = false;
     }

@@ -1,9 +1,11 @@
 <script>
   import { onMount, onDestroy } from "svelte";
   import Chart from "chart.js/auto";
+  import { transactionService } from "$lib/services/transactionService.js";
   import { api } from "$lib/api.js";
   import { auth } from "$lib/stores/auth.js";
   import { formatRupiah, formatTanggal, formatPeriode } from "$lib/utils/format.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import Card from "$lib/components/Card.svelte";
   import StatCard from "$lib/components/StatCard.svelte";
   import Badge from "$lib/components/Badge.svelte";
@@ -54,7 +56,7 @@
     errorMessage = "";
     try {
       const [summaryRes, remindersRes] = await Promise.all([
-        api.get("summary"),
+        transactionService.getSummary(),
         api.get("reminders")
       ]);
 
@@ -63,7 +65,7 @@
 
       setTimeout(renderChart, 80);
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat ringkasan kas";
+      errorMessage = extractErrorMessage(err, "Gagal memuat ringkasan kas");
     } finally {
       isLoading = false;
     }

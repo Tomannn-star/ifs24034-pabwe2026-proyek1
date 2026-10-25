@@ -1,8 +1,9 @@
 <script>
   import { onMount } from "svelte";
-  import { api } from "$lib/api.js";
+  import { duesService } from "$lib/services/duesService.js";
   import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatPeriode, formatTanggal } from "$lib/utils/format.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import StatCard from "$lib/components/StatCard.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -30,10 +31,10 @@
     isLoading = true;
     errorMessage = "";
     try {
-      const res = await api.get("reminders/overdue");
+      const res = await duesService.getDefaulters();
       overdueData = res;
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat daftar penunggak";
+      errorMessage = extractErrorMessage(err, "Gagal memuat daftar penunggak");
       toast.error(errorMessage);
     } finally {
       isLoading = false;

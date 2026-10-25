@@ -4,14 +4,12 @@ import path from "path";
 const routes = [
   "auth/login",
   "auth/register",
-  "login",
   "transaksi",
   "transaksi/baru",
   "iuran",
   "anggota",
   "penunggak",
-  "kategori",
-  "design-system"
+  "kategori"
 ];
 
 for (const route of routes) {

@@ -1,9 +1,11 @@
 <script>
   import { onMount } from "svelte";
-  import { api } from "$lib/api.js";
+  import { transactionService } from "$lib/services/transactionService.js";
+  import { categoryService } from "$lib/services/categoryService.js";
   import { auth } from "$lib/stores/auth.js";
   import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatTanggal } from "$lib/utils/format.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Button from "$lib/components/Button.svelte";
   import Badge from "$lib/components/Badge.svelte";
@@ -54,7 +56,7 @@
 
   async function loadCategories() {
     try {
-      const res = await api.get("categories");
+      const res = await categoryService.getCategories();
       categories = res.data || [];
     } catch (e) {
       console.error("Gagal memuat kategori:", e);
@@ -65,22 +67,19 @@
     isLoading = true;
     errorMessage = "";
     try {
-      const queryParams = new URLSearchParams({
-        page: String(targetPage),
-        limit: String(pagination.limit)
+      const res = await transactionService.getTransactions({
+        page: targetPage,
+        limit: pagination.limit,
+        jenis: filterJenis,
+        kategori_id: filterCategoryId,
+        dari: filterDari,
+        sampai: filterSampai,
+        q: searchKeyword.trim()
       });
-
-      if (filterJenis) queryParams.set("jenis", filterJenis);
-      if (filterCategoryId) queryParams.set("category_id", filterCategoryId);
-      if (filterDari) queryParams.set("dari", filterDari);
-      if (filterSampai) queryParams.set("sampai", filterSampai);
-      if (searchKeyword.trim()) queryParams.set("q", searchKeyword.trim());
-
-      const res = await api.get(`transactions?${queryParams.toString()}`);
       transactions = res.data || [];
       pagination = res.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 };
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat data transaksi";
+      errorMessage = extractErrorMessage(err, "Gagal memuat data transaksi");
       toast.error(errorMessage);
     } finally {
       isLoading = false;
@@ -136,13 +135,13 @@
     if (!transactionToDelete) return;
     isDeleting = true;
     try {
-      await api.delete(`transactions/${transactionToDelete.id}`);
+      await transactionService.deleteTransaction(transactionToDelete.id);
       toast.success("Catatan transaksi kas berhasil dihapus");
       isDeleteModalOpen = false;
       transactionToDelete = null;
       loadTransactions(pagination.page);
     } catch (err) {
-      toast.error(err.message || "Gagal menghapus transaksi");
+      toast.error(extractErrorMessage(err, "Gagal menghapus transaksi"));
     } finally {
       isDeleting = false;
     }

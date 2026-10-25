@@ -1,6 +1,10 @@
 <script>
   import { onMount } from "svelte";
-  import { api } from "$lib/api.js";
+  import { transactionService } from "$lib/services/transactionService.js";
+  import { categoryService } from "$lib/services/categoryService.js";
+  import { memberService } from "$lib/services/memberService.js";
+  import { validateNominal, validateTanggal, validateKeterangan } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
   import { toast } from "$lib/stores/toast.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
@@ -45,8 +49,8 @@
   onMount(async () => {
     try {
       const [catsRes, membersRes] = await Promise.all([
-        api.get("categories"),
-        api.get("members?aktif=1")
+        categoryService.getCategories(),
+        memberService.getMembers({ aktif: 1 })
       ]);
       allCategories = catsRes.data || [];
       members = membersRes.data || [];
@@ -55,7 +59,7 @@
         category_id = String(filteredCategories[0].id);
       }
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat data pilihan";
+      errorMessage = extractErrorMessage(err, "Gagal memuat data pilihan");
       toast.error(errorMessage);
     }
   });
@@ -75,9 +79,16 @@
     e.preventDefault();
     errorMessage = "";
 
-    const nominal = parseInt(jumlah, 10);
-    if (isNaN(nominal) || nominal <= 0) {
-      errorMessage = "Jumlah transaksi harus berupa angka bulat positif (Rp)";
+    const tanggalErr = validateTanggal(tanggal);
+    if (tanggalErr) {
+      errorMessage = tanggalErr;
+      toast.error(errorMessage);
+      return;
+    }
+
+    const nominalErr = validateNominal(jumlah, 1);
+    if (nominalErr) {
+      errorMessage = nominalErr;
       toast.error(errorMessage);
       return;
     }
@@ -88,13 +99,20 @@
       return;
     }
 
+    const ketErr = validateKeterangan(keterangan, true);
+    if (ketErr) {
+      errorMessage = ketErr;
+      toast.error(errorMessage);
+      return;
+    }
+
     isLoading = true;
     try {
-      await api.post("transactions", {
+      await transactionService.createTransaction({
         tanggal,
         jenis,
-        jumlah: nominal,
-        category_id: parseInt(category_id, 10),
+        jumlah: parseInt(jumlah, 10),
+        kategori_id: parseInt(category_id, 10),
         member_id: member_id ? parseInt(member_id, 10) : null,
         keterangan: keterangan.trim()
       });
@@ -102,7 +120,7 @@
       toast.success("Transaksi kas berhasil disimpan");
       goto("/transaksi");
     } catch (err) {
-      errorMessage = err.message || "Gagal menyimpan transaksi";
+      errorMessage = extractErrorMessage(err, "Gagal menyimpan transaksi");
       toast.error(errorMessage);
     } finally {
       isLoading = false;

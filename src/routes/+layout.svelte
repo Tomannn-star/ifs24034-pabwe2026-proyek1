@@ -39,7 +39,7 @@
     if (!browser) return;
 
     const path = page.url.pathname;
-    const isPublicPage = path.startsWith("/auth/") || path === "/login";
+    const isPublicPage = path.startsWith("/auth/");
 
     if (!token && !isPublicPage) {
       goto("/auth/login");
@@ -77,7 +77,7 @@
 <!-- Komponen Notifikasi Toast Global -->
 <Toast />
 
-{#if page.url.pathname.startsWith("/auth/") || page.url.pathname === "/login"}
+{#if page.url.pathname.startsWith("/auth/")}
   <main id="main-content" class="min-h-screen">
     {@render children()}
   </main>

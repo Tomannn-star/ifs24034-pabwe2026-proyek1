@@ -1,7 +1,11 @@
 <script>
   import { onMount } from "svelte";
   import { page } from "$app/state";
-  import { api } from "$lib/api.js";
+  import { transactionService } from "$lib/services/transactionService.js";
+  import { categoryService } from "$lib/services/categoryService.js";
+  import { memberService } from "$lib/services/memberService.js";
+  import { validateNominal, validateTanggal, validateKeterangan } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
   import { toast } from "$lib/stores/toast.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
@@ -36,9 +40,9 @@
   onMount(async () => {
     try {
       const [txRes, catsRes, membersRes] = await Promise.all([
-        api.get(`transactions/${txId}`),
-        api.get("categories"),
-        api.get("members")
+        transactionService.getTransactionById(txId),
+        categoryService.getCategories(),
+        memberService.getMembers()
       ]);
 
       allCategories = catsRes.data || [];
@@ -54,7 +58,7 @@
         keterangan = tx.keterangan || "";
       }
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat detail transaksi";
+      errorMessage = extractErrorMessage(err, "Gagal memuat detail transaksi");
       toast.error(errorMessage);
     } finally {
       isLoading = false;
@@ -65,9 +69,16 @@
     e.preventDefault();
     errorMessage = "";
 
-    const nominal = parseInt(jumlah, 10);
-    if (isNaN(nominal) || nominal <= 0) {
-      errorMessage = "Jumlah transaksi harus berupa angka bulat positif (Rp)";
+    const tanggalErr = validateTanggal(tanggal);
+    if (tanggalErr) {
+      errorMessage = tanggalErr;
+      toast.error(errorMessage);
+      return;
+    }
+
+    const nominalErr = validateNominal(jumlah, 1);
+    if (nominalErr) {
+      errorMessage = nominalErr;
       toast.error(errorMessage);
       return;
     }
@@ -78,13 +89,20 @@
       return;
     }
 
+    const ketErr = validateKeterangan(keterangan, true);
+    if (ketErr) {
+      errorMessage = ketErr;
+      toast.error(errorMessage);
+      return;
+    }
+
     isSubmitting = true;
     try {
-      await api.put(`transactions/${txId}`, {
+      await transactionService.updateTransaction(txId, {
         tanggal,
         jenis,
-        jumlah: nominal,
-        category_id: parseInt(category_id, 10),
+        jumlah: parseInt(jumlah, 10),
+        kategori_id: parseInt(category_id, 10),
         member_id: member_id ? parseInt(member_id, 10) : null,
         keterangan: keterangan.trim()
       });
@@ -92,7 +110,7 @@
       toast.success("Catatan transaksi berhasil diperbarui");
       goto("/transaksi");
     } catch (err) {
-      errorMessage = err.message || "Gagal memperbarui transaksi";
+      errorMessage = extractErrorMessage(err, "Gagal memperbarui transaksi");
       toast.error(errorMessage);
     } finally {
       isSubmitting = false;

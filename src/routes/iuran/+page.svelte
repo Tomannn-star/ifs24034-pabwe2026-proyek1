@@ -1,9 +1,11 @@
 <script>
   import { onMount } from "svelte";
-  import { api } from "$lib/api.js";
+  import { duesService } from "$lib/services/duesService.js";
   import { auth } from "$lib/stores/auth.js";
   import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatTanggal, formatPeriode } from "$lib/utils/format.js";
+  import { validateNominal, validateTanggal } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -60,14 +62,13 @@
     isLoading = true;
     errorMessage = "";
     try {
-      const params = new URLSearchParams();
-      if (selectedPeriode) params.set("periode", selectedPeriode);
-      if (filterStatus) params.set("status", filterStatus);
-
-      const res = await api.get(`dues?${params.toString()}`);
+      const res = await duesService.getDues({
+        periode: selectedPeriode,
+        status: filterStatus
+      });
       dues = res.data || [];
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat data iuran";
+      errorMessage = extractErrorMessage(err, "Gagal memuat data iuran");
       toast.error(errorMessage);
     } finally {
       isLoading = false;
@@ -92,13 +93,13 @@
     if (!dueToPay) return;
     isPaying = true;
     try {
-      await api.post(`dues/${dueToPay.id}/pay`, {});
+      await duesService.payDues(dueToPay.id);
       toast.success(`Iuran "${dueToPay.nama_anggota}" periode ${dueToPay.periode} berhasil dilunasi & kas tercatat.`);
       isPayModalOpen = false;
       dueToPay = null;
       loadDues();
     } catch (err) {
-      toast.error(err.message || "Gagal menandai lunas iuran");
+      toast.error(extractErrorMessage(err, "Gagal menandai lunas iuran"));
     } finally {
       isPaying = false;
     }
@@ -106,9 +107,22 @@
 
   async function handleGenerateSubmit(e) {
     e.preventDefault();
+
+    const nominalErr = validateNominal(genNominal, 1000);
+    if (nominalErr) {
+      toast.error(nominalErr);
+      return;
+    }
+
+    const jatuhTempoErr = validateTanggal(genJatuhTempo);
+    if (jatuhTempoErr) {
+      toast.error(jatuhTempoErr);
+      return;
+    }
+
     isGenerating = true;
     try {
-      const res = await api.post("dues/generate", {
+      const res = await duesService.generateMonthlyDues({
         periode: genPeriode,
         nominal: Number(genNominal),
         jatuh_tempo: genJatuhTempo
@@ -119,7 +133,7 @@
       selectedPeriode = genPeriode;
       loadDues();
     } catch (err) {
-      toast.error(err.message || "Gagal membuat tagihan iuran");
+      toast.error(extractErrorMessage(err, "Gagal membuat tagihan iuran"));
     } finally {
       isGenerating = false;
     }

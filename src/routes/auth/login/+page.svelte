@@ -1,7 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import { auth } from "$lib/stores/auth.js";
-  import { api } from "$lib/api.js";
+  import { authService } from "$lib/services/authService.js";
+  import { validateUsername, validatePassword } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
   import Button from "$lib/components/Button.svelte";
   import {
@@ -37,22 +39,24 @@
     e.preventDefault();
     errorMessage = "";
 
-    if (!username.trim() || !password) {
-      errorMessage = "Username dan password wajib diisi";
+    const usernameErr = validateUsername(username);
+    if (usernameErr) {
+      errorMessage = usernameErr;
+      return;
+    }
+
+    const passwordErr = validatePassword(password);
+    if (passwordErr) {
+      errorMessage = passwordErr;
       return;
     }
 
     isLoading = true;
     try {
-      const res = await api.post("auth/login", {
-        username: username.trim(),
-        password
-      });
-
-      auth.login(res.token, res.user);
+      await authService.login(username, password);
       goto("/");
     } catch (err) {
-      errorMessage = err.message || "Username atau password salah";
+      errorMessage = extractErrorMessage(err, "Username atau password salah");
     } finally {
       isLoading = false;
     }

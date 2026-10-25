@@ -1,8 +1,10 @@
 <script>
   import { onMount } from "svelte";
-  import { api } from "$lib/api.js";
+  import { memberService } from "$lib/services/memberService.js";
   import { toast } from "$lib/stores/toast.js";
   import { formatTanggal } from "$lib/utils/format.js";
+  import { validateName, validatePhone } from "$lib/utils/validators.js";
+  import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Button from "$lib/components/Button.svelte";
   import Badge from "$lib/components/Badge.svelte";
@@ -54,14 +56,13 @@
     isLoading = true;
     errorMessage = "";
     try {
-      const params = new URLSearchParams();
-      if (filterAktif !== "") params.set("aktif", filterAktif);
-      if (searchQuery.trim()) params.set("q", searchQuery.trim());
-
-      const res = await api.get(`members?${params.toString()}`);
+      const res = await memberService.getMembers({
+        aktif: filterAktif,
+        q: searchQuery
+      });
       members = res.data || [];
     } catch (err) {
-      errorMessage = err.message || "Gagal memuat daftar anggota";
+      errorMessage = extractErrorMessage(err, "Gagal memuat daftar anggota");
       toast.error(errorMessage);
     } finally {
       isLoading = false;
@@ -88,24 +89,32 @@
 
   async function handleSave(e) {
     if (e && e.preventDefault) e.preventDefault();
-    if (!formNama.trim()) {
-      toast.error("Nama anggota wajib diisi");
+
+    const nameErr = validateName(formNama);
+    if (nameErr) {
+      toast.error(nameErr);
+      return;
+    }
+
+    const phoneErr = validatePhone(formKontak);
+    if (phoneErr) {
+      toast.error(phoneErr);
       return;
     }
 
     isSaving = true;
     try {
       if (isEditing) {
-        await api.put(`members/${currentId}`, {
-          nama: formNama.trim(),
-          kontak: formKontak.trim() || null,
+        await memberService.updateMember(currentId, {
+          nama: formNama,
+          kontak: formKontak,
           aktif: formAktif
         });
         toast.success(`Data anggota "${formNama.trim()}" berhasil diperbarui`);
       } else {
-        await api.post("members", {
-          nama: formNama.trim(),
-          kontak: formKontak.trim() || null,
+        await memberService.createMember({
+          nama: formNama,
+          kontak: formKontak,
           aktif: formAktif
         });
         toast.success(`Anggota baru "${formNama.trim()}" berhasil ditambahkan`);
@@ -114,7 +123,7 @@
       isFormModalOpen = false;
       loadMembers();
     } catch (err) {
-      toast.error(err.message || "Gagal menyimpan data anggota");
+      toast.error(extractErrorMessage(err, "Gagal menyimpan data anggota"));
     } finally {
       isSaving = false;
     }
@@ -130,11 +139,7 @@
     isToggling = true;
     const nextStatus = memberToToggle.aktif === 1 ? 0 : 1;
     try {
-      await api.put(`members/${memberToToggle.id}`, {
-        nama: memberToToggle.nama,
-        kontak: memberToToggle.kontak,
-        aktif: nextStatus
-      });
+      await memberService.toggleStatus(memberToToggle);
       toast.success(
         `Status ${memberToToggle.nama} diubah menjadi ${nextStatus === 1 ? 'Aktif' : 'Nonaktif'}`
       );
@@ -142,7 +147,7 @@
       memberToToggle = null;
       loadMembers();
     } catch (err) {
-      toast.error(err.message || "Gagal mengubah status anggota");
+      toast.error(extractErrorMessage(err, "Gagal mengubah status anggota"));
     } finally {
       isToggling = false;
     }
@@ -157,13 +162,13 @@
     if (!memberToDelete) return;
     isDeleting = true;
     try {
-      await api.delete(`members/${memberToDelete.id}`);
+      await memberService.deleteMember(memberToDelete.id);
       toast.success(`Anggota "${memberToDelete.nama}" berhasil dihapus`);
       isDeleteModalOpen = false;
       memberToDelete = null;
       loadMembers();
     } catch (err) {
-      toast.error(err.message || "Gagal menghapus anggota");
+      toast.error(extractErrorMessage(err, "Gagal menghapus anggota"));
     } finally {
       isDeleting = false;
     }
