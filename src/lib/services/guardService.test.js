@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { checkRouteAccess, assertRole, assertBendahara, AuthorizationError } from "./guardService.js";
 import { USER_ROLES, ROUTES } from "../constants/index.js";
 

@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { formatRupiah, formatTanggal, formatPeriode } from "./format.js";
 
 describe("Frontend Format Utilities", () => {
