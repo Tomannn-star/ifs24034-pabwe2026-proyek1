@@ -8,19 +8,27 @@
 import { APP_CONFIG } from "../constants/index.js";
 import { getCookie, setCookie, removeCookie } from "../utils/cookies.js";
 
-const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+function isClientEnvironment() {
+  return typeof window !== "undefined" && typeof document !== "undefined";
+}
 
-class TokenService {
+export class TokenService {
   /** @type {string|null} */
   #token = null;
   /** @type {any|null} */
   #user = null;
 
   constructor() {
-    if (isBrowser) {
-      // Prioritaskan pembacaan dari Cookie untuk kompatibilitas SSR / server guard
+    this.init();
+  }
+
+  /**
+   * Inisialisasi pembacaan sesi awal dari penyimpanan browser
+   */
+  init() {
+    if (isClientEnvironment()) {
       const cookieToken = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
-      const storageToken = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      const storageToken = typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN) : null;
       const token = cookieToken || storageToken || null;
 
       if (token && this.isTokenExpired(token)) {
@@ -30,7 +38,7 @@ class TokenService {
       this.#token = token;
 
       const cookieUser = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
-      const storageUser = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
+      const storageUser = typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER) : null;
       const rawUser = cookieUser || storageUser;
       if (rawUser) {
         try {
@@ -86,8 +94,8 @@ class TokenService {
    */
   getToken() {
     let token = this.#token;
-    if (!token && isBrowser) {
-      token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN) || localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+    if (!token && isClientEnvironment()) {
+      token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN) || (typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN) : null);
     }
     if (token && this.isTokenExpired(token)) {
       this.clearSession();
@@ -107,8 +115,8 @@ class TokenService {
       return null;
     }
     if (this.#user) return this.#user;
-    if (isBrowser) {
-      const raw = getCookie(APP_CONFIG.STORAGE_KEYS.USER) || localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
+    if (isClientEnvironment()) {
+      const raw = getCookie(APP_CONFIG.STORAGE_KEYS.USER) || (typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER) : null);
       if (raw) {
         try {
           return JSON.parse(raw);
@@ -147,15 +155,17 @@ class TokenService {
     this.#token = token;
     this.#user = user;
 
-    if (isBrowser) {
+    if (isClientEnvironment()) {
       const serializedUser = JSON.stringify(user);
       // Simpan ke cookie dengan SameSite dan Secure
       setCookie(APP_CONFIG.STORAGE_KEYS.TOKEN, token, 7);
       setCookie(APP_CONFIG.STORAGE_KEYS.USER, serializedUser, 7);
 
       // Sinkronkan ke localStorage sebagai fallback
-      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TOKEN, token);
-      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TOKEN, token);
+        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
+      }
     }
   }
 
@@ -165,10 +175,12 @@ class TokenService {
    */
   setUser(user) {
     this.#user = user;
-    if (isBrowser) {
+    if (isClientEnvironment()) {
       const serializedUser = JSON.stringify(user);
       setCookie(APP_CONFIG.STORAGE_KEYS.USER, serializedUser, 7);
-      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
+      }
     }
   }
 
@@ -179,11 +191,13 @@ class TokenService {
     this.#token = null;
     this.#user = null;
 
-    if (isBrowser) {
+    if (isClientEnvironment()) {
       removeCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
       removeCookie(APP_CONFIG.STORAGE_KEYS.USER);
-      localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER);
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER);
+      }
     }
   }
 }
