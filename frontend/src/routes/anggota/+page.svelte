@@ -234,7 +234,7 @@
         <tbody class="divide-y divide-slate-100">
           {#if isLoading}
             <tr>
-              <td colspan="6" class="p-12 text-center text-slate-400">
+              <td colspan="6" class="p-12 text-center text-slate-600">
                 <div class="inline-block animate-spin rounded-full h-7 w-7 border-2 border-teal-700 border-t-transparent"></div>
                 <div class="mt-2 text-xs font-medium">Memuat data anggota kelas...</div>
               </td>
@@ -252,7 +252,7 @@
           {:else}
             {#each members as m, idx}
               <tr class="hover:bg-slate-50/70 transition duration-75">
-                <td class="py-3.5 px-4 text-center font-semibold text-slate-400 text-xs">
+                <td class="py-3.5 px-4 text-center font-semibold text-slate-600 text-xs">
                   {idx + 1}
                 </td>
                 <td class="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
@@ -261,11 +261,11 @@
                 <td class="py-3.5 px-4 text-slate-600 text-xs font-mono whitespace-nowrap">
                   {#if m.kontak}
                     <span class="inline-flex items-center gap-1.5 text-slate-700">
-                      <Phone class="w-3.5 h-3.5 text-slate-400" />
+                      <Phone class="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                       <span>{m.kontak}</span>
                     </span>
                   {:else}
-                    <span class="text-slate-400">-</span>
+                    <span class="text-slate-600">-</span>
                   {/if}
                 </td>
                 <td class="py-3.5 px-4 whitespace-nowrap">

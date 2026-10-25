@@ -266,7 +266,6 @@
             <button
               type="button"
               onclick={() => setDemoAccount("bendahara", "bendahara123")}
-              aria-label="Isi demo akun bendahara"
               class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 transition cursor-pointer group"
             >
               <div class="font-bold text-slate-800 group-hover:text-teal-900 flex items-center justify-between">
@@ -279,7 +278,6 @@
             <button
               type="button"
               onclick={() => setDemoAccount("anggota1", "anggota123")}
-              aria-label="Isi demo akun anggota Ahmad"
               class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 transition cursor-pointer group"
             >
               <div class="font-bold text-slate-800 group-hover:text-teal-900 flex items-center justify-between">
@@ -292,7 +290,6 @@
             <button
               type="button"
               onclick={() => setDemoAccount("anggota2", "anggota123")}
-              aria-label="Isi demo akun anggota Budi yang menunggak"
               class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50/50 transition cursor-pointer group"
             >
               <div class="font-bold text-slate-800 group-hover:text-rose-900 flex items-center justify-between">
@@ -305,7 +302,6 @@
             <button
               type="button"
               onclick={() => setDemoAccount("anggota3", "anggota123")}
-              aria-label="Isi demo akun anggota Citra yang lunas"
               class="p-2.5 text-left rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition cursor-pointer group"
             >
               <div class="font-bold text-slate-800 group-hover:text-emerald-900 flex items-center justify-between">

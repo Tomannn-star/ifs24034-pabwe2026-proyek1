@@ -306,7 +306,7 @@
         <tbody class="divide-y divide-slate-100">
           {#if isLoading}
             <tr>
-              <td colspan={currentUser?.role === 'bendahara' ? 7 : 6} class="p-12 text-center text-slate-400">
+              <td colspan={currentUser?.role === 'bendahara' ? 7 : 6} class="p-12 text-center text-slate-600">
                 <div class="inline-block animate-spin rounded-full h-7 w-7 border-2 border-teal-700 border-t-transparent"></div>
                 <div class="mt-2 text-xs font-medium">Memuat data transaksi kas...</div>
               </td>
@@ -360,10 +360,10 @@
                   {#if tx.nama_anggota}
                     <span class="font-semibold text-slate-700">{tx.nama_anggota}</span>
                   {:else}
-                    <span class="text-slate-400">-</span>
+                    <span class="text-slate-600">-</span>
                   {/if}
                 </td>
-                <td class="py-3.5 px-4 whitespace-nowrap text-right font-extrabold text-sm tabular-nums {tx.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                <td class="py-3.5 px-4 whitespace-nowrap text-right font-extrabold text-sm tabular-nums {tx.jenis === 'masuk' ? 'text-emerald-800' : 'text-rose-700'}">
                   {tx.jenis === 'masuk' ? '+' : '-'} {formatRupiah(tx.jumlah)}
                 </td>
                 {#if currentUser?.role === "bendahara"}

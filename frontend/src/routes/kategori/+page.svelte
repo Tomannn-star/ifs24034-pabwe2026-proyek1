@@ -233,7 +233,7 @@
             {:else}
               {#each categories as cat, idx}
                 <tr class="hover:bg-slate-50/70 transition duration-75">
-                  <td class="py-3 px-4 font-semibold text-slate-400 text-xs text-center">
+                  <td class="py-3 px-4 font-semibold text-slate-600 text-xs text-center">
                     {idx + 1}
                   </td>
                   <td class="py-3 px-4 font-bold text-slate-900">
@@ -256,17 +256,17 @@
                     <div class="flex items-center justify-center gap-1">
                       <button
                         onclick={() => startEdit(cat)}
-                        class="p-1.5 text-slate-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer"
+                        class="p-1.5 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer"
                         title="Edit Kategori"
-                        aria-label="Edit"
+                        aria-label="Edit kategori {cat.nama}"
                       >
                         <Pencil class="w-4 h-4" />
                       </button>
                       <button
                         onclick={() => promptDelete(cat)}
-                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                         title="Hapus Kategori"
-                        aria-label="Hapus"
+                        aria-label="Hapus kategori {cat.nama}"
                       >
                         <Trash2 class="w-4 h-4" />
                       </button>

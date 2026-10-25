@@ -205,7 +205,7 @@
         <tbody class="divide-y divide-slate-100">
           {#if isLoading}
             <tr>
-              <td colspan={currentUser?.role === 'bendahara' ? 7 : 5} class="p-12 text-center text-slate-400">
+              <td colspan={currentUser?.role === 'bendahara' ? 7 : 5} class="p-12 text-center text-slate-600">
                 <div class="inline-block animate-spin rounded-full h-7 w-7 border-2 border-teal-700 border-t-transparent"></div>
                 <div class="mt-2 text-xs font-medium">Memuat data iuran...</div>
               </td>
@@ -269,7 +269,7 @@
                         <span>Tandai Lunas</span>
                       </Button>
                     {:else}
-                      <span class="text-xs text-slate-400 font-semibold">Tercatat</span>
+                      <span class="text-xs text-slate-600 font-semibold">Tercatat</span>
                     {/if}
                   </td>
                 {/if}

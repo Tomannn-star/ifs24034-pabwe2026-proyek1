@@ -78,7 +78,9 @@
 <Toast />
 
 {#if page.url.pathname.startsWith("/auth/") || page.url.pathname === "/login"}
-  {@render children()}
+  <main id="main-content" class="min-h-screen">
+    {@render children()}
+  </main>
 {:else}
   <div class="min-h-screen bg-slate-50 text-slate-800 flex">
     <!-- ========================================================= -->
@@ -208,12 +210,12 @@
     </aside>
 
     <!-- ========================================================= -->
-    <!-- MOBILE TOP BAR & DRAWER                                   -->
+    <!-- MOBILE TOP BAR (Header Landmark) & DRAWER                 -->
     <!-- ========================================================= -->
-    <div class="lg:hidden fixed top-0 inset-x-0 h-16 bg-white border-b border-slate-200/80 px-4 flex items-center justify-between z-30 shadow-2xs">
+    <header class="lg:hidden fixed top-0 inset-x-0 h-16 bg-white border-b border-slate-200/80 px-4 flex items-center justify-between z-30 shadow-2xs">
       <a href="/" class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg bg-teal-700 text-white flex items-center justify-center shadow-xs">
-          <Wallet class="w-4 h-4 text-white" />
+          <Wallet class="w-4 h-4 text-white" aria-hidden="true" />
         </div>
         <span class="font-bold text-base text-slate-900 tracking-tight">KasPintar</span>
       </a>
@@ -230,7 +232,7 @@
           <Menu class="w-5 h-5" aria-hidden="true" />
         {/if}
       </button>
-    </div>
+    </header>
 
     <!-- Mobile Drawer Overlay -->
     {#if isMobileDrawerOpen}
@@ -256,17 +258,17 @@
             <button
               type="button"
               onclick={() => (isMobileDrawerOpen = false)}
-              class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              class="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100"
               aria-label="Tutup Menu"
             >
-              <X class="w-5 h-5" />
+              <X class="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 
           <!-- Drawer Navigation -->
           <nav class="p-3 space-y-4">
             <div>
-              <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                 Menu Utama
               </p>
               <div class="space-y-1">
@@ -275,7 +277,7 @@
                   onclick={() => (isMobileDrawerOpen = false)}
                   class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
                 >
-                  <LayoutDashboard class="w-4 h-4 text-teal-700" />
+                  <LayoutDashboard class="w-4 h-4 text-teal-700" aria-hidden="true" />
                   <span>Dashboard</span>
                 </a>
 
@@ -284,7 +286,7 @@
                   onclick={() => (isMobileDrawerOpen = false)}
                   class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname.startsWith('/transaksi') ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
                 >
-                  <Receipt class="w-4 h-4 text-teal-700" />
+                  <Receipt class="w-4 h-4 text-teal-700" aria-hidden="true" />
                   <span>Transaksi</span>
                 </a>
 
@@ -293,7 +295,7 @@
                   onclick={() => (isMobileDrawerOpen = false)}
                   class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/iuran' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
                 >
-                  <CalendarClock class="w-4 h-4 text-teal-700" />
+                  <CalendarClock class="w-4 h-4 text-teal-700" aria-hidden="true" />
                   <span>{currentUser?.role === 'bendahara' ? 'Kelola Iuran' : 'Iuran Saya'}</span>
                 </a>
               </div>
@@ -301,7 +303,7 @@
 
             {#if currentUser?.role === "bendahara"}
               <div>
-                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                   Administrasi
                 </p>
                 <div class="space-y-1">
@@ -310,7 +312,7 @@
                     onclick={() => (isMobileDrawerOpen = false)}
                     class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/anggota' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
                   >
-                    <Users class="w-4 h-4 text-teal-700" />
+                    <Users class="w-4 h-4 text-teal-700" aria-hidden="true" />
                     <span>Anggota</span>
                   </a>
 
@@ -319,7 +321,7 @@
                     onclick={() => (isMobileDrawerOpen = false)}
                     class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/penunggak' ? 'bg-rose-50 text-rose-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
                   >
-                    <AlertTriangle class="w-4 h-4 text-rose-600" />
+                    <AlertTriangle class="w-4 h-4 text-rose-600" aria-hidden="true" />
                     <span>Penunggak</span>
                   </a>
 
@@ -328,7 +330,7 @@
                     onclick={() => (isMobileDrawerOpen = false)}
                     class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium {page.url.pathname === '/kategori' ? 'bg-teal-50 text-teal-800 font-semibold' : 'text-slate-600 hover:bg-slate-50'}"
                   >
-                    <Tag class="w-4 h-4 text-teal-700" />
+                    <Tag class="w-4 h-4 text-teal-700" aria-hidden="true" />
                     <span>Kategori</span>
                   </a>
                 </div>
@@ -342,7 +344,7 @@
           <div class="flex items-center justify-between">
             <div class="min-w-0">
               <p class="text-sm font-bold text-slate-800 truncate">{currentUser?.nama || currentUser?.username}</p>
-              <p class="text-xs text-slate-500 capitalize">{currentUser?.role}</p>
+              <p class="text-xs text-slate-600 capitalize">{currentUser?.role}</p>
             </div>
             <button
               type="button"
@@ -368,13 +370,13 @@
 
       <!-- Minimalist Clean Footer -->
       <footer class="border-t border-slate-200/80 bg-white/70 py-4 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
           <div class="flex items-center gap-2">
-            <span class="font-semibold text-slate-700">KasPintar</span>
-            <span class="text-slate-300">&bull;</span>
+            <span class="font-semibold text-slate-800">KasPintar</span>
+            <span class="text-slate-400">&bull;</span>
             <span>Sistem Pencatatan Uang Kas Kelas</span>
           </div>
-          <div class="text-[11px] text-slate-400">
+          <div class="text-[11px] text-slate-600 font-medium">
             Praktikum Pengembangan Aplikasi Berbasis Web &bull; 2026
           </div>
         </div>

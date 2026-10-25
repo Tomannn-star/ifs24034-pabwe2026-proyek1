@@ -68,7 +68,7 @@
   </PageHeader>
 
   {#if isLoading}
-    <div class="p-16 text-center text-slate-400">
+    <div class="p-16 text-center text-slate-600">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-3 border-teal-700 border-t-transparent"></div>
       <p class="mt-2 text-sm font-medium">Menganalisis keterlambatan iuran anggota...</p>
     </div>

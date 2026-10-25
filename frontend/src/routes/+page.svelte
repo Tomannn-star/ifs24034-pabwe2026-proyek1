@@ -108,6 +108,7 @@
         ]
       },
       options: {
+        animation: false,
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -225,7 +226,7 @@
   {/if}
 
   {#if isLoading}
-    <div class="p-16 text-center text-slate-400 space-y-3">
+    <div class="p-16 text-center text-slate-600 space-y-3">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-3 border-teal-700 border-t-transparent"></div>
       <p class="text-sm font-medium">Memuat data ikhtisar kas kelas...</p>
     </div>
@@ -399,36 +400,36 @@
       </div>
 
       {#if !summaryData?.transaksi_terakhir || summaryData.transaksi_terakhir.length === 0}
-        <div class="p-10 text-center text-slate-400 text-sm">Belum ada transaksi tercatat</div>
+        <div class="p-10 text-center text-slate-600 text-sm">Belum ada transaksi tercatat</div>
       {:else}
         <div class="divide-y divide-slate-100">
           {#each summaryData.transaksi_terakhir as tx}
             <div class="p-4 flex items-center justify-between hover:bg-slate-50/70 transition duration-75">
               <div class="flex items-center gap-3.5 min-w-0">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {tx.jenis === 'masuk' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-rose-50 text-rose-700 border border-rose-200/60'}">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {tx.jenis === 'masuk' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/60' : 'bg-rose-50 text-rose-800 border border-rose-200/60'}">
                   {#if tx.jenis === 'masuk'}
-                    <ArrowDownLeft class="w-5 h-5" />
+                    <ArrowDownLeft class="w-5 h-5" aria-hidden="true" />
                   {:else}
-                    <ArrowUpRight class="w-5 h-5" />
+                    <ArrowUpRight class="w-5 h-5" aria-hidden="true" />
                   {/if}
                 </div>
                 <div class="min-w-0">
                   <div class="text-sm font-bold text-slate-800 truncate">
                     {tx.keterangan || tx.nama_kategori}
                   </div>
-                  <div class="text-xs text-slate-400 flex flex-wrap items-center gap-2 mt-0.5">
-                    <span class="font-medium text-slate-500">{formatTanggal(tx.tanggal)}</span>
+                  <div class="text-xs text-slate-600 flex flex-wrap items-center gap-2 mt-0.5">
+                    <span class="font-medium text-slate-700">{formatTanggal(tx.tanggal)}</span>
                     <span>&bull;</span>
                     <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold">{tx.nama_kategori}</span>
                     {#if tx.nama_anggota}
                       <span>&bull;</span>
-                      <span class="text-slate-600 text-[11px] font-medium">{tx.nama_anggota}</span>
+                      <span class="text-slate-700 text-[11px] font-medium">{tx.nama_anggota}</span>
                     {/if}
                   </div>
                 </div>
               </div>
 
-              <div class="text-right font-extrabold text-sm tabular-nums {tx.jenis === 'masuk' ? 'text-emerald-600' : 'text-rose-600'} shrink-0 ml-4">
+              <div class="text-right font-extrabold text-sm tabular-nums {tx.jenis === 'masuk' ? 'text-emerald-800' : 'text-rose-700'} shrink-0 ml-4">
                 {tx.jenis === 'masuk' ? '+' : '-'} {formatRupiah(tx.jumlah)}
               </div>
             </div>
