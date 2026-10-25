@@ -168,7 +168,7 @@
     description="Riwayat mutasi arus kas masuk dan kas keluar kas kelas secara transparan."
     icon={Receipt}
   >
-    {#if currentUser?.role === "bendahara"}
+    {#if currentUser?.role === USER_ROLES.BENDAHARA}
       <a href="/transaksi/baru">
         <Button variant="primary" size="md">
           <Plus class="w-4 h-4 mr-1.5" />
@@ -295,7 +295,7 @@
             <th class="py-3.5 px-4 font-bold">Keterangan</th>
             <th class="py-3.5 px-4 font-bold">Anggota Terkait</th>
             <th class="py-3.5 px-4 font-bold text-right">Jumlah</th>
-            {#if currentUser?.role === "bendahara"}
+            {#if currentUser?.role === USER_ROLES.BENDAHARA}
               <th class="py-3.5 px-4 font-bold text-center">Aksi</th>
             {/if}
           </tr>
@@ -303,14 +303,14 @@
         <tbody class="divide-y divide-slate-100">
           {#if isLoading}
             <tr>
-              <td colspan={currentUser?.role === 'bendahara' ? 7 : 6} class="p-12 text-center text-slate-600">
+              <td colspan={currentUser?.role === USER_ROLES.BENDAHARA ? 7 : 6} class="p-12 text-center text-slate-600">
                 <div class="inline-block animate-spin rounded-full h-7 w-7 border-2 border-teal-700 border-t-transparent"></div>
                 <div class="mt-2 text-xs font-medium">Memuat data transaksi kas...</div>
               </td>
             </tr>
           {:else if transactions.length === 0}
             <tr>
-              <td colspan={currentUser?.role === 'bendahara' ? 7 : 6} class="p-12 text-center">
+              <td colspan={currentUser?.role === USER_ROLES.BENDAHARA ? 7 : 6} class="p-12 text-center">
                 <EmptyState
                   title="Tidak ada transaksi yang cocok"
                   description="Coba sesuaikan kata kunci pencarian atau bersihkan saringan kategori."
@@ -363,7 +363,7 @@
                 <td class="py-3.5 px-4 whitespace-nowrap text-right font-extrabold text-sm tabular-nums {tx.jenis === 'masuk' ? 'text-emerald-800' : 'text-rose-700'}">
                   {tx.jenis === 'masuk' ? '+' : '-'} {formatRupiah(tx.jumlah)}
                 </td>
-                {#if currentUser?.role === "bendahara"}
+                {#if currentUser?.role === USER_ROLES.BENDAHARA}
                   <td class="py-3.5 px-4 whitespace-nowrap text-center">
                     <div class="flex items-center justify-center gap-1">
                       <a

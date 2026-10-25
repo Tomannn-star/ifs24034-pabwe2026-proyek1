@@ -1,11 +1,12 @@
 <script>
   import Button from "./Button.svelte";
   import { MODAL_VARIANTS } from "$lib/constants/index.js";
+  import { X } from "lucide-svelte";
 
   /**
-   * Komponen Modal konfirmasi & dialog interaktif modern
-   * Menyediakan kontrak props yang konsisten untuk seluruh halaman.
-   * 
+   * Komponen Modal konfirmasi & dialog interaktif modern dan aksesibel (WAI-ARIA Dialog).
+   * Mendukung focus management, escape keydown, aria-labelledby, dan aria-describedby.
+   *
    * @type {{
    *   open: boolean,
    *   title?: string,
@@ -60,20 +61,32 @@
       handleClose();
     }
   }
+
+  function handleBackdropClick(e) {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  }
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
 {#if open}
+  <!-- Backdrop & Dialog Container -->
   <div
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-xs transition-opacity duration-150"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
+    aria-describedby={message ? "modal-description" : undefined}
+    tabindex="-1"
+    onclick={handleBackdropClick}
+    onkeydown={(e) => { if (e.key === 'Escape') handleClose(); }}
   >
-    <!-- Modal Card -->
+    <!-- Modal Card Box -->
     <div
       class="bg-white rounded-2xl max-w-md w-full shadow-xl border border-slate-200/80 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150"
+      role="document"
     >
       <div class="flex items-start justify-between gap-3">
         <h3 id="modal-title" class="font-extrabold text-lg text-slate-900 leading-snug">
@@ -82,15 +95,15 @@
         <button
           onclick={handleClose}
           type="button"
-          class="text-slate-600 hover:text-slate-800 p-1 -mr-1 -mt-1 rounded-lg text-lg leading-none transition"
-          aria-label="Tutup Dialog"
+          class="text-slate-600 hover:text-slate-900 p-1.5 -mr-1 -mt-1 rounded-lg transition hover:bg-slate-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-600"
+          aria-label="Tutup dialog {title}"
         >
-          &times;
+          <X class="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
       {#if message}
-        <p class="text-sm text-slate-600 leading-relaxed">
+        <p id="modal-description" class="text-sm text-slate-600 leading-relaxed">
           {message}
         </p>
       {/if}

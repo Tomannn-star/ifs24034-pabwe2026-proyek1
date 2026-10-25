@@ -237,7 +237,7 @@
     <!-- ============================================================= -->
     <!-- 1. BANNER PENGINGAT (REMINDERS) MODERN                        -->
     <!-- ============================================================= -->
-    {#if currentUser?.role === "anggota" && remindersData}
+    {#if currentUser?.role === USER_ROLES.ANGGOTA && remindersData}
       {#if remindersData.jumlah_belum_bayar === 0}
         <!-- HIJAU: Semua Lunas -->
         <div class="p-5 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-emerald-500/10 border border-emerald-500/20 text-emerald-950 rounded-2xl flex items-center gap-4 shadow-2xs">
@@ -355,6 +355,7 @@
         subtitle="Iuran anggota & donasi masuk"
         trend="Iuran tertib"
         trendType="up"
+        variant="success"
         icon={ArrowDownLeft}
       />
 
@@ -365,6 +366,7 @@
         subtitle="Belanja ATK, konsumsi & kegiatan"
         trend="Operasional"
         trendType="down"
+        variant="danger"
         icon={ArrowUpRight}
       />
     </div>

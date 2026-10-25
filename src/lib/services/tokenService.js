@@ -1,7 +1,8 @@
 /**
  * @fileoverview Service Manajemen Token dan Sesi KasPintar
  * Menyediakan abstraksi penyimpanan token sesi menggunakan kombinasi Cookie dan Storage klien.
- * Memungkinkan sinkronisasi kredensial ke Server-Side Guard via Cookie dan persistensi klien.
+ * Memungkinkan sinkronisasi kredensial ke Server-Side Guard via Cookie dan persistensi klien,
+ * dilengkapi dengan pemeriksaan validitas dan kadaluarsa JWT (expiration verification).
  */
 
 import { APP_CONFIG } from "../constants/index.js";
@@ -20,7 +21,13 @@ class TokenService {
       // Prioritaskan pembacaan dari Cookie untuk kompatibilitas SSR / server guard
       const cookieToken = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
       const storageToken = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
-      this.#token = cookieToken || storageToken || null;
+      const token = cookieToken || storageToken || null;
+
+      if (token && this.isTokenExpired(token)) {
+        this.clearSession();
+        return;
+      }
+      this.#token = token;
 
       const cookieUser = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
       const storageUser = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
@@ -36,15 +43,58 @@ class TokenService {
   }
 
   /**
+   * Mengurai payload JWT secara aman
+   * @param {string} token
+   * @returns {Object|null}
+   */
+  decodePayload(token) {
+    if (!token || typeof token !== "string") return null;
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return null;
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Memeriksa apakah token JWT telah kadaluarsa
+   * @param {string} [token]
+   * @returns {boolean}
+   */
+  isTokenExpired(token = null) {
+    const targetToken = token || this.#token;
+    if (!targetToken) return true;
+    const payload = this.decodePayload(targetToken);
+    if (!payload || !payload.exp) return false;
+    return Date.now() >= payload.exp * 1000;
+  }
+
+  /**
    * Mendapatkan token autentikasi saat ini
+   * Membersihkan sesi otomatis apabila token telah kadaluarsa
    * @returns {string|null}
    */
   getToken() {
-    if (this.#token) return this.#token;
-    if (isBrowser) {
-      return getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN) || localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+    let token = this.#token;
+    if (!token && isBrowser) {
+      token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN) || localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
     }
-    return null;
+    if (token && this.isTokenExpired(token)) {
+      this.clearSession();
+      return null;
+    }
+    this.#token = token;
+    return token;
   }
 
   /**
@@ -52,6 +102,10 @@ class TokenService {
    * @returns {any|null}
    */
   getUser() {
+    if (this.#token && this.isTokenExpired(this.#token)) {
+      this.clearSession();
+      return null;
+    }
     if (this.#user) return this.#user;
     if (isBrowser) {
       const raw = getCookie(APP_CONFIG.STORAGE_KEYS.USER) || localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
@@ -99,7 +153,7 @@ class TokenService {
       setCookie(APP_CONFIG.STORAGE_KEYS.TOKEN, token, 7);
       setCookie(APP_CONFIG.STORAGE_KEYS.USER, serializedUser, 7);
 
-      // Sinkronkan ke localStorage sebagai fallback offline
+      // Sinkronkan ke localStorage sebagai fallback
       localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TOKEN, token);
       localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
     }
@@ -135,4 +189,3 @@ class TokenService {
 }
 
 export const tokenService = new TokenService();
-

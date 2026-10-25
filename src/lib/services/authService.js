@@ -6,6 +6,7 @@
 
 import { api } from "../api.js";
 import { auth } from "../stores/auth.js";
+import { USER_ROLES } from "../constants/index.js";
 
 export const authService = {
   /**
@@ -43,7 +44,7 @@ export const authService = {
       username: payload.username.trim(),
       password: payload.password,
       kontak: payload.kontak?.trim() || null,
-      role: payload.role || "anggota"
+      role: payload.role || USER_ROLES.ANGGOTA
     });
   },
 

@@ -1,10 +1,14 @@
 <script>
   /**
-   * Komponen StatCard gaya dashboard fintech
+   * Komponen StatCard gaya dashboard fintech modern
+   * Mendukung prop title, value, subtext/subtitle, trend, trendType, variant, icon, class
    * @type {{
    *   title: string,
    *   value: string | number,
    *   subtext?: string,
+   *   subtitle?: string,
+   *   trend?: string,
+   *   trendType?: 'up' | 'down' | 'neutral',
    *   variant?: 'primary' | 'success' | 'danger' | 'warning' | 'neutral',
    *   icon?: any,
    *   class?: string
@@ -14,10 +18,15 @@
     title,
     value,
     subtext = "",
+    subtitle = "",
+    trend = "",
+    trendType = "neutral",
     variant = "primary",
     icon: IconComponent = null,
     class: customClass = ""
   } = $props();
+
+  const effectiveSubtext = $derived(subtext || subtitle);
 
   const variantStyles = {
     primary: {
@@ -52,6 +61,12 @@
     }
   };
 
+  const trendStyles = {
+    up: "text-emerald-700 bg-emerald-50 border-emerald-200/60",
+    down: "text-rose-700 bg-rose-50 border-rose-200/60",
+    neutral: "text-slate-700 bg-slate-100 border-slate-200"
+  };
+
   const style = $derived(variantStyles[variant] || variantStyles.primary);
 </script>
 
@@ -71,12 +86,20 @@
     <div class="text-3xl font-extrabold tracking-tight tabular-nums {style.valText}">
       {value}
     </div>
-    {#if subtext}
-      <div class="flex items-center gap-1.5 mt-2 text-xs text-slate-600">
-        <span class="w-1.5 h-1.5 rounded-full shrink-0 {style.dot}"></span>
-        <span>{subtext}</span>
-      </div>
-    {/if}
+    
+    <div class="flex items-center justify-between gap-2 mt-2">
+      {#if effectiveSubtext}
+        <div class="flex items-center gap-1.5 text-xs text-slate-600">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {style.dot}"></span>
+          <span>{effectiveSubtext}</span>
+        </div>
+      {/if}
+
+      {#if trend}
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border shrink-0 {trendStyles[trendType] || trendStyles.neutral}">
+          {trend}
+        </span>
+      {/if}
+    </div>
   </div>
 </div>
-
