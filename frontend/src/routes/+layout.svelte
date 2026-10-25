@@ -194,11 +194,14 @@
           <button
             type="button"
             onclick={handleLogout}
-            class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition duration-150 shrink-0 cursor-pointer"
+            id="btn-logout"
+            name="btn-logout"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50/80 hover:bg-rose-100/80 rounded-xl transition duration-150 shrink-0 cursor-pointer border border-rose-200/50"
             title="Keluar dari KasPintar"
             aria-label="Logout"
           >
-            <LogOut class="w-4 h-4" />
+            <LogOut class="w-3.5 h-3.5" />
+            <span>Keluar</span>
           </button>
         </div>
       </div>
@@ -343,6 +346,8 @@
             <button
               type="button"
               onclick={handleLogout}
+              id="btn-logout-mobile"
+              name="btn-logout"
               class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-semibold transition"
             >
               Keluar

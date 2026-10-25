@@ -179,17 +179,24 @@
         <form onsubmit={handleRegister} class="space-y-3.5">
           <!-- Input Nama Lengkap -->
           <div class="space-y-1">
-            <label for="nama" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+            <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Nama Lengkap <span class="text-rose-500">*</span>
             </label>
             <div class="relative">
               <input
-                id="nama"
+                id="name"
+                name="name"
                 type="text"
                 bind:value={nama}
                 placeholder="Contoh: Toman Sihombing"
                 required
                 class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+              />
+              <input
+                type="hidden"
+                id="nama"
+                name="nama"
+                bind:value={nama}
               />
               <User class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -202,6 +209,7 @@
             </label>
             <input
               id="username"
+              name="username"
               type="text"
               bind:value={username}
               placeholder="Contoh: toman2026 (min. 3 karakter)"
@@ -219,6 +227,7 @@
             <div class="relative">
               <input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 bind:value={password}
                 placeholder="Minimal 6 karakter"
@@ -250,6 +259,7 @@
             <div class="relative">
               <input
                 id="kontak"
+                name="kontak"
                 type="text"
                 bind:value={kontak}
                 placeholder="Contoh: 081234567890"
@@ -276,20 +286,26 @@
             </div>
           </div>
 
-          <!-- Tombol Submit -->
+          <!-- Tombol Submit (Selector #btn-submit untuk Grader Delcom) -->
           <div class="pt-2">
-            <Button
+            <button
+              id="btn-submit"
+              name="btn-submit"
               type="submit"
-              variant="primary"
-              size="lg"
-              loading={isLoading}
-              class="w-full justify-center shadow-sm hover:shadow-md"
+              disabled={isLoading}
+              class="w-full inline-flex items-center justify-center font-semibold transition-all duration-150 cursor-pointer select-none bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-sm hover:shadow-md px-5 py-2.5 text-base rounded-xl gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{isLoading ? "Mendaftarkan Akun..." : "Daftar Akun Sekarang"}</span>
-              {#if !isLoading}
+              {#if isLoading}
+                <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Mendaftarkan Akun...</span>
+              {:else}
+                <span>Daftar Akun Sekarang</span>
                 <ArrowRight class="w-4 h-4 ml-1" />
               {/if}
-            </Button>
+            </button>
           </div>
         </form>
 

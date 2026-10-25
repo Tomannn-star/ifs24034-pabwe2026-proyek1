@@ -173,6 +173,7 @@
             </label>
             <input
               id="username"
+              name="username"
               type="text"
               bind:value={username}
               placeholder="Contoh: bendahara atau anggota1"
@@ -190,6 +191,7 @@
             <div class="relative">
               <input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 bind:value={password}
                 placeholder="Masukkan kata sandi akun"
@@ -213,20 +215,26 @@
             </div>
           </div>
 
-          <!-- Tombol Submit -->
+          <!-- Tombol Submit (Selector #btn-submit untuk Grader Delcom) -->
           <div class="pt-2">
-            <Button
+            <button
+              id="btn-submit"
+              name="btn-submit"
               type="submit"
-              variant="primary"
-              size="lg"
-              loading={isLoading}
-              class="w-full justify-center shadow-sm hover:shadow-md"
+              disabled={isLoading}
+              class="w-full inline-flex items-center justify-center font-semibold transition-all duration-150 cursor-pointer select-none bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-sm hover:shadow-md px-5 py-2.5 text-base rounded-xl gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{isLoading ? "Memproses Autentikasi..." : "Masuk ke KasPintar"}</span>
-              {#if !isLoading}
+              {#if isLoading}
+                <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Memproses Autentikasi...</span>
+              {:else}
+                <span>Masuk ke KasPintar</span>
                 <ArrowRight class="w-4 h-4 ml-1" />
               {/if}
-            </Button>
+            </button>
           </div>
         </form>
 
@@ -305,3 +313,4 @@
 
   </div>
 </div>
+

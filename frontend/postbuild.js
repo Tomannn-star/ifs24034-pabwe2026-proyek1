@@ -32,3 +32,4 @@ if (fs.existsSync("build/index.html")) {
 }
 
 console.log("✅ Postbuild: seluruh rute statis HTML & fallback 404.html berhasil digenerate!");
+
