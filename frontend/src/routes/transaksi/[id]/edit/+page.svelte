@@ -136,7 +136,7 @@
               class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'masuk' ? 'bg-teal-50 border-teal-600 text-teal-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
             >
               <input type="radio" name="jenis" value="masuk" bind:group={jenis} class="sr-only" />
-              <ArrowDownLeft class="w-4 h-4 {jenis === 'masuk' ? 'text-teal-700' : 'text-slate-400'}" />
+              <ArrowDownLeft class="w-4 h-4 {jenis === 'masuk' ? 'text-teal-700' : 'text-slate-600'}" />
               <span>Kas Masuk</span>
             </label>
 
@@ -144,7 +144,7 @@
               class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'keluar' ? 'bg-rose-50 border-rose-500 text-rose-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
             >
               <input type="radio" name="jenis" value="keluar" bind:group={jenis} class="sr-only" />
-              <ArrowUpRight class="w-4 h-4 {jenis === 'keluar' ? 'text-rose-600' : 'text-slate-400'}" />
+              <ArrowUpRight class="w-4 h-4 {jenis === 'keluar' ? 'text-rose-600' : 'text-slate-600'}" />
               <span>Kas Keluar</span>
             </label>
           </div>
@@ -170,7 +170,7 @@
               Jumlah Uang (Rupiah)
             </label>
             <div class="relative">
-              <span class="absolute left-3.5 top-2.5 text-slate-400 text-sm font-semibold select-none">Rp</span>
+              <span class="absolute left-3.5 top-2.5 text-slate-600 text-sm font-semibold select-none">Rp</span>
               <input
                 id="jumlah"
                 type="number"

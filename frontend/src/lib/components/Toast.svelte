@@ -21,7 +21,7 @@
   };
 </script>
 
-<div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0">
+<div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0" role="region" aria-label="Notifikasi">
   {#each toasts as t (t.id)}
     <div
       class="pointer-events-auto p-3.5 rounded-2xl border shadow-lg backdrop-blur-md flex items-center justify-between gap-3 text-sm animate-in slide-in-from-bottom-2 fade-in duration-150 {typeStyles[t.type] || typeStyles.info}"

@@ -66,7 +66,7 @@
         <button
           onclick={handleClose}
           type="button"
-          class="text-slate-400 hover:text-slate-600 p-1 -mr-1 -mt-1 rounded-lg text-lg leading-none transition"
+          class="text-slate-600 hover:text-slate-800 p-1 -mr-1 -mt-1 rounded-lg text-lg leading-none transition"
           aria-label="Tutup Dialog"
         >
           &times;

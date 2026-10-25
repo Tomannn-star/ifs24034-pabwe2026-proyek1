@@ -190,7 +190,7 @@
   <!-- Filter & Pencarian -->
   <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row gap-3">
     <div class="relative flex-1">
-      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-600">
         <Search class="w-4 h-4" aria-hidden="true" />
       </div>
       <input
@@ -199,7 +199,7 @@
         oninput={() => loadMembers()}
         placeholder="Cari nama anggota atau nomor kontak..."
         aria-label="Cari nama anggota atau nomor kontak"
-        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
+        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
       />
     </div>
 
@@ -295,17 +295,17 @@
                   <div class="flex items-center justify-center gap-1">
                     <button
                       onclick={() => openEditModal(m)}
-                      class="p-1.5 text-slate-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer"
+                      class="p-1.5 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer"
                       title="Edit Data Anggota"
-                      aria-label="Edit"
+                      aria-label="Edit data anggota {m.nama}"
                     >
                       <Pencil class="w-4 h-4" />
                     </button>
                     <button
                       onclick={() => promptDelete(m)}
-                      class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                      class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                       title="Hapus Anggota"
-                      aria-label="Hapus"
+                      aria-label="Hapus data anggota {m.nama}"
                     >
                       <Trash2 class="w-4 h-4" />
                     </button>

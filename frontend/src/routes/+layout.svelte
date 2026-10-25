@@ -200,7 +200,6 @@
             name="btn-logout"
             class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50/80 hover:bg-rose-100/80 rounded-xl transition duration-150 shrink-0 cursor-pointer border border-rose-200/50"
             title="Keluar dari KasPintar"
-            aria-label="Logout"
           >
             <LogOut class="w-3.5 h-3.5" />
             <span>Keluar</span>
@@ -373,7 +372,7 @@
         <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
           <div class="flex items-center gap-2">
             <span class="font-semibold text-slate-800">KasPintar</span>
-            <span class="text-slate-400">&bull;</span>
+            <span class="text-slate-600">&bull;</span>
             <span>Sistem Pencatatan Uang Kas Kelas</span>
           </div>
           <div class="text-[11px] text-slate-600 font-medium">

@@ -192,7 +192,7 @@
                 placeholder="Contoh: Toman Sihombing"
                 required
                 aria-label="Nama Lengkap"
-                class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+                class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
               />
               <input
                 type="hidden"
@@ -200,7 +200,7 @@
                 name="nama"
                 bind:value={nama}
               />
-              <User class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+              <User class="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             </div>
           </div>
 
@@ -218,7 +218,7 @@
               required
               autocomplete="username"
               aria-label="Username"
-              class="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+              class="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
             />
           </div>
 
@@ -237,7 +237,7 @@
                 required
                 autocomplete="new-password"
                 aria-label="Password"
-                class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+                class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
               />
               <button
                 type="button"
@@ -268,9 +268,9 @@
                 bind:value={kontak}
                 placeholder="Contoh: 081234567890"
                 aria-label="No WhatsApp atau HP"
-                class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
+                class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
               />
-              <Phone class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+              <Phone class="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             </div>
           </div>
 
@@ -281,11 +281,11 @@
             </span>
             <div class="grid grid-cols-2 gap-2">
               <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === 'anggota' ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
-                <input type="radio" bind:group={role} value="anggota" aria-label="Peran Anggota Kelas" class="text-teal-700 focus:ring-teal-700" />
+                <input type="radio" bind:group={role} value="anggota" class="text-teal-700 focus:ring-teal-700" />
                 <span class="text-xs">Anggota Kelas</span>
               </label>
               <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === 'bendahara' ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
-                <input type="radio" bind:group={role} value="bendahara" aria-label="Peran Bendahara" class="text-teal-700 focus:ring-teal-700" />
+                <input type="radio" bind:group={role} value="bendahara" class="text-teal-700 focus:ring-teal-700" />
                 <span class="text-xs">Bendahara</span>
               </label>
             </div>
@@ -298,7 +298,6 @@
               name="btn-submit"
               type="submit"
               disabled={isLoading}
-              aria-label="Daftar Akun Sekarang"
               class="w-full inline-flex items-center justify-center font-semibold transition-all duration-150 cursor-pointer select-none bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-sm hover:shadow-md px-5 py-2.5 text-base rounded-xl gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {#if isLoading}

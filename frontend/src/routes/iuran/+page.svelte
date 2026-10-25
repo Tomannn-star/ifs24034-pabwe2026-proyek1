@@ -344,7 +344,7 @@
         Nominal Iuran (Rupiah)
       </label>
       <div class="relative">
-        <span class="absolute left-3.5 top-2.5 text-slate-400 text-sm font-semibold">Rp</span>
+        <span class="absolute left-3.5 top-2.5 text-slate-600 text-sm font-semibold">Rp</span>
         <input
           id="genNominal"
           type="number"
