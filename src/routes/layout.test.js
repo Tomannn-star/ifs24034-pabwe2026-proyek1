@@ -34,3 +34,4 @@ describe("Root Layout Server & Client Configuration", () => {
     expect(data.pathname).toBe("/");
   });
 });
+

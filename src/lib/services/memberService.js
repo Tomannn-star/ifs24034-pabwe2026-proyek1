@@ -21,11 +21,12 @@ export const memberService = {
     if (filter.aktif !== undefined && filter.aktif !== "") {
       params.set("aktif", String(filter.aktif));
     }
-    if (filter.q && filter.q.trim()) {
+    if (filter.q?.trim()) {
       params.set("q", filter.q.trim());
     }
     const query = params.toString();
-    return await api.get(`members${query ? `?${query}` : ""}`);
+    const endpoint = query ? `members?${query}` : "members";
+    return await api.get(endpoint);
   },
 
   /**
@@ -52,7 +53,7 @@ export const memberService = {
     return await api.post("members", {
       nama: data.nama.trim(),
       kontak: data.kontak?.trim() || null,
-      aktif: data.aktif !== undefined ? Number(data.aktif) : 1
+      aktif: data.aktif === undefined ? 1 : Number(data.aktif)
     });
   },
 
@@ -68,7 +69,7 @@ export const memberService = {
     return await api.put(`members/${id}`, {
       nama: data.nama.trim(),
       kontak: data.kontak?.trim() || null,
-      aktif: data.aktif !== undefined ? Number(data.aktif) : 1
+      aktif: data.aktif === undefined ? 1 : Number(data.aktif)
     });
   },
 

@@ -25,7 +25,8 @@ export const duesService = {
     if (filter.member_id) params.set("member_id", String(filter.member_id));
 
     const query = params.toString();
-    return await api.get(`dues${query ? `?${query}` : ""}`);
+    const endpoint = query ? `dues?${query}` : "dues";
+    return await api.get(endpoint);
   },
 
   /**

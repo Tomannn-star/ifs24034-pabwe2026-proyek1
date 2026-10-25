@@ -9,9 +9,9 @@ import { tokenService } from "../services/tokenService.js";
 import { ROUTES } from "../constants/index.js";
 
 export function navigateToLogin() {
-  if (typeof window === "undefined") return;
-  if (window.location && window.location.pathname !== ROUTES.LOGIN) {
-    window.location.href = ROUTES.LOGIN;
+  if (typeof globalThis.window === "undefined") return;
+  if (globalThis.window.location && globalThis.window.location.pathname !== ROUTES.LOGIN) {
+    globalThis.window.location.href = ROUTES.LOGIN;
   }
 }
 

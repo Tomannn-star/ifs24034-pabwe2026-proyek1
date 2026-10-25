@@ -9,7 +9,7 @@ import { APP_CONFIG } from "../constants/index.js";
 import { getCookie, setCookie, removeCookie } from "../utils/cookies.js";
 
 function isClientEnvironment() {
-  return typeof window !== "undefined" && typeof document !== "undefined";
+  return typeof globalThis.window !== "undefined" && typeof globalThis.document !== "undefined";
 }
 
 export class TokenService {
@@ -63,11 +63,11 @@ export class TokenService {
       const parts = token.split(".");
       if (parts.length !== 3) return null;
       const base64Url = parts[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const base64 = base64Url.replaceAll("-", "+").replaceAll("_", "/");
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .map((c) => "%" + ("00" + c.codePointAt(0).toString(16)).slice(-2))
           .join("")
       );
       return JSON.parse(jsonPayload);
@@ -85,7 +85,7 @@ export class TokenService {
     const targetToken = token || this.#token;
     if (!targetToken) return true;
     const payload = this.decodePayload(targetToken);
-    if (!payload || !payload.exp) return false;
+    if (!payload?.exp) return false;
     return Date.now() >= payload.exp * 1000;
   }
 
@@ -97,14 +97,17 @@ export class TokenService {
   getToken() {
     let token = this.#token;
     if (!token && isClientEnvironment()) {
-      token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN) || (typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN) : null);
+      token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      if (!token && typeof localStorage !== "undefined") {
+        token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      }
     }
     if (token && this.isTokenExpired(token)) {
       this.clearSession();
       return null;
     }
-    this.#token = token;
-    return token;
+    this.#token = token || null;
+    return this.#token;
   }
 
   /**
@@ -140,7 +143,7 @@ export class TokenService {
    */
   hasRole(role) {
     const user = this.getUser();
-    return Boolean(user && user.role === role);
+    return Boolean(user?.role === role);
   }
 
   /**

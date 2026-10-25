@@ -16,9 +16,9 @@ import { APP_CONFIG } from "../constants/index.js";
 export function sanitizeInput(input) {
   if (typeof input !== "string") return "";
   return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<[^>]*>/g, "")
-    .replace(/[&<>"']/g, (m) => ({
+    .replaceAll(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replaceAll(/<[^>]*>/g, "")
+    .replaceAll(/[&<>"']/g, (m) => ({
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
@@ -65,7 +65,7 @@ export function validateUsername(username) {
   if (clean.length > 30) {
     return "Username maksimal 30 karakter";
   }
-  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+  const usernameRegex = /^\w+$/;
   if (!usernameRegex.test(clean)) {
     return "Username hanya boleh memuat huruf, angka, dan garis bawah (_)";
   }
@@ -103,7 +103,7 @@ export function validateNominal(amount, min = 1) {
     return "Nominal uang wajib diisi";
   }
   const num = Number(amount);
-  if (isNaN(num)) {
+  if (Number.isNaN(num)) {
     return "Nominal harus berupa angka valid";
   }
   if (num < min) {
@@ -125,8 +125,8 @@ export function validatePhone(phone) {
   if (!phone || typeof phone !== "string" || phone.trim() === "") {
     return null; // Opsional
   }
-  const clean = phone.trim().replace(/[-\s]/g, "");
-  const phoneRegex = /^(\+62|62|0)[0-9]{8,14}$/;
+  const clean = phone.trim().replaceAll(/[-\s]/g, "");
+  const phoneRegex = /^(\+62|62|0)\d{8,14}$/;
   if (!phoneRegex.test(clean)) {
     return "Format nomor WhatsApp tidak valid (contoh: 081234567890)";
   }
@@ -169,7 +169,7 @@ export function validateTanggal(dateStr) {
     return "Format tanggal tidak valid (harus YYYY-MM-DD)";
   }
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) {
+  if (Number.isNaN(d.getTime())) {
     return "Tanggal kalender tidak valid";
   }
   return null;

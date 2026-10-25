@@ -1,6 +1,5 @@
 import { auth } from "./stores/auth.js";
 import { tokenService } from "./services/tokenService.js";
-import { ROUTES } from "./constants/index.js";
 
 // Ambil URL API dari environment variable (PUBLIC_API_URL atau VITE_API_URL)
 const envApiUrl = import.meta.env.PUBLIC_API_URL || 
@@ -20,7 +19,7 @@ export function getBaseUrl(overrideUrl = envApiUrl) {
   if (overrideUrl && overrideUrl.trim() !== "") {
     return overrideUrl.replace(/\/$/, "");
   }
-  if (typeof window !== "undefined" && window.location?.hostname?.includes("vercel.app")) {
+  if (typeof globalThis.window !== "undefined" && globalThis.window.location?.hostname?.includes("vercel.app")) {
     return "https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api";
   }
   return "http://localhost:5001/api";
@@ -41,10 +40,7 @@ export async function apiRequest(endpoint, options = {}) {
 
   const token = tokenService.getToken();
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {})
-  };
+  const headers = Object.assign({ "Content-Type": "application/json" }, options.headers);
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -59,14 +55,15 @@ export async function apiRequest(endpoint, options = {}) {
   } catch (err) {
     // Tangani error jaringan (misal server backend belum dinyalakan atau tidak dapat dijangkau)
     throw new Error(
-      `Gagal terhubung ke server backend (${baseUrl}). Pastikan server backend sedang aktif.`
+      `Gagal terhubung ke server backend (${baseUrl}). Pastikan server backend sedang aktif.`,
+      { cause: err }
     );
   }
 
   // Jika token tidak valid / kedaluwarsa, otomatis logout ke login page
   if (response.status === 401) {
-    const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
-    if (isBrowser && window.location && !window.location.pathname.startsWith("/auth/") && window.location.pathname !== "/login") {
+    const isBrowser = typeof globalThis.window !== "undefined" && typeof globalThis.document !== "undefined";
+    if (isBrowser && globalThis.window.location && !globalThis.window.location.pathname.startsWith("/auth/") && globalThis.window.location.pathname !== "/login") {
       auth.logout(true);
     }
     const errData = await response.json().catch(() => ({}));

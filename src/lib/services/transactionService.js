@@ -37,12 +37,13 @@ export const transactionService = {
     if (filter.kategori_id) params.set("kategori_id", String(filter.kategori_id));
     if (filter.dari) params.set("dari", filter.dari);
     if (filter.sampai) params.set("sampai", filter.sampai);
-    if (filter.q && filter.q.trim()) params.set("q", filter.q.trim());
+    if (filter.q?.trim()) params.set("q", filter.q.trim());
     if (filter.page) params.set("page", String(filter.page));
     if (filter.limit) params.set("limit", String(filter.limit));
 
     const query = params.toString();
-    return await api.get(`transactions${query ? `?${query}` : ""}`);
+    const endpoint = query ? `transactions?${query}` : "transactions";
+    return await api.get(endpoint);
   },
 
   /**

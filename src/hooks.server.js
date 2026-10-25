@@ -4,7 +4,7 @@
  * dan izin peran pengguna yang tersimpan di dalam HTTP Cookie.
  */
 
-import { APP_CONFIG, ROUTES, USER_ROLES, RESTRICTED_BENDAHARA_ROUTES } from "./lib/constants/index.js";
+import { APP_CONFIG, USER_ROLES } from "./lib/constants/index.js";
 
 /**
  * Handle hook server SvelteKit
@@ -29,9 +29,6 @@ export async function handle({ event, resolve }) {
   event.locals.isAuthenticated = Boolean(token && user);
   event.locals.isBendahara = Boolean(user && user.role === USER_ROLES.BENDAHARA);
 
-  const pathname = event.url.pathname;
-  const isPublicRoute = pathname.startsWith("/auth/") || pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER;
-
   // Catat header keamanan dasar pada setiap respons
   const response = await resolve(event);
   response.headers.set("X-Frame-Options", "DENY");
@@ -40,4 +37,3 @@ export async function handle({ event, resolve }) {
 
   return response;
 }
-

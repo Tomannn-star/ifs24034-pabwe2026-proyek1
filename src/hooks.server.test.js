@@ -96,3 +96,4 @@ describe("SvelteKit Server Hooks", () => {
     expect(event.locals.isAuthenticated).toBe(false);
   });
 });
+
