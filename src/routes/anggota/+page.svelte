@@ -5,21 +5,22 @@
   import { formatTanggal } from "$lib/utils/format.js";
   import { validateName, validatePhone } from "$lib/utils/validators.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
+  import { BADGE_VARIANTS, MODAL_VARIANTS } from "$lib/constants/index.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Button from "$lib/components/Button.svelte";
   import Badge from "$lib/components/Badge.svelte";
   import Modal from "$lib/components/Modal.svelte";
+  import Input from "$lib/components/Input.svelte";
+  import Select from "$lib/components/Select.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import {
     Users,
     UserPlus,
-    Search,
     Pencil,
     Trash2,
     Phone,
     CheckCircle2,
-    XCircle,
-    RotateCcw
+    XCircle
   } from "lucide-svelte";
 
   let members = $state([]);
@@ -192,33 +193,29 @@
     </Button>
   </PageHeader>
 
-  <!-- Filter & Pencarian -->
-  <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row gap-3">
-    <div class="relative flex-1">
-      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-600">
-        <Search class="w-4 h-4" aria-hidden="true" />
-      </div>
-      <input
-        type="text"
+  <!-- Filter & Pencarian menggunakan Input & Select -->
+  <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row items-center gap-3">
+    <div class="flex-1 w-full">
+      <Input
+        id="searchQuery"
         bind:value={searchQuery}
         oninput={() => loadMembers()}
         placeholder="Cari nama anggota atau nomor kontak..."
         aria-label="Cari nama anggota atau nomor kontak"
-        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
       />
     </div>
 
     <div class="w-full sm:w-48">
-      <select
+      <Select
+        id="filterAktif"
         bind:value={filterAktif}
         onchange={() => loadMembers()}
         aria-label="Filter status keaktifan anggota"
-        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
       >
         <option value="">Semua Status</option>
         <option value="1">Aktif Saja</option>
         <option value="0">Nonaktif Saja</option>
-      </select>
+      </Select>
     </div>
   </div>
 
@@ -281,12 +278,12 @@
                     title="Klik untuk mengubah status"
                   >
                     {#if m.aktif === 1}
-                      <Badge variant="success" size="sm">
+                      <Badge variant={BADGE_VARIANTS.SUCCESS} size="sm">
                         <CheckCircle2 class="w-3.5 h-3.5 mr-1" />
                         <span>Aktif</span>
                       </Badge>
                     {:else}
-                      <Badge variant="neutral" size="sm">
+                      <Badge variant={BADGE_VARIANTS.NEUTRAL} size="sm">
                         <XCircle class="w-3.5 h-3.5 mr-1" />
                         <span>Nonaktif</span>
                       </Badge>
@@ -329,54 +326,40 @@
 <Modal
   open={isFormModalOpen}
   title={isEditing ? 'Edit Data Anggota' : 'Tambah Anggota Baru'}
-  confirmText={isEditing ? 'Perbarui Data' : 'Tambah Anggota'}
-  cancelText="Batal"
-  confirmVariant="primary"
+  confirmLabel={isEditing ? 'Perbarui Data' : 'Tambah Anggota'}
+  cancelLabel="Batal"
+  variant={MODAL_VARIANTS.PRIMARY}
   loading={isSaving}
   onclose={() => (isFormModalOpen = false)}
   onconfirm={handleSave}
 >
   <form onsubmit={handleSave} class="space-y-4">
-    <div class="space-y-1.5">
-      <label for="formNama" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-        Nama Lengkap
-      </label>
-      <input
-        id="formNama"
-        type="text"
-        bind:value={formNama}
-        placeholder="Contoh: Muhammad Rizky"
-        required
-        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-      />
-    </div>
+    <Input
+      id="formNama"
+      name="formNama"
+      label="Nama Lengkap"
+      bind:value={formNama}
+      placeholder="Contoh: Muhammad Rizky"
+      required
+    />
 
-    <div class="space-y-1.5">
-      <label for="formKontak" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-        Nomor Kontak / WhatsApp
-      </label>
-      <input
-        id="formKontak"
-        type="text"
-        bind:value={formKontak}
-        placeholder="Contoh: 081234567890"
-        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-      />
-    </div>
+    <Input
+      id="formKontak"
+      name="formKontak"
+      label="Nomor Kontak / WhatsApp"
+      bind:value={formKontak}
+      placeholder="Contoh: 081234567890"
+    />
 
-    <div class="space-y-1.5">
-      <label for="formStatus" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-        Status Keaktifan
-      </label>
-      <select
-        id="formStatus"
-        bind:value={formAktif}
-        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-      >
-        <option value={1}>Aktif (Menerima Tagihan Iuran Bulanan)</option>
-        <option value={0}>Nonaktif (Tidak Ditagih Iuran)</option>
-      </select>
-    </div>
+    <Select
+      id="formStatus"
+      name="formStatus"
+      label="Status Keaktifan"
+      bind:value={formAktif}
+    >
+      <option value={1}>Aktif (Menerima Tagihan Iuran Bulanan)</option>
+      <option value={0}>Nonaktif (Tidak Ditagih Iuran)</option>
+    </Select>
   </form>
 </Modal>
 
@@ -384,23 +367,25 @@
 <Modal
   open={isDeleteModalOpen}
   title="Konfirmasi Hapus Anggota"
-  confirmText="Ya, Hapus Anggota"
-  cancelText="Batal"
-  confirmVariant="danger"
+  confirmLabel="Ya, Hapus Anggota"
+  cancelLabel="Batal"
+  variant={MODAL_VARIANTS.DANGER}
   loading={isDeleting}
   onclose={() => (isDeleteModalOpen = false)}
   onconfirm={confirmDelete}
 >
   {#if memberToDelete}
-    <p class="text-sm text-slate-600">
-      Apakah kamu yakin ingin menghapus data anggota:
-    </p>
-    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900">
-      {memberToDelete.nama}
+    <div class="space-y-3">
+      <p class="text-sm text-slate-600">
+        Apakah kamu yakin ingin menghapus data anggota:
+      </p>
+      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900">
+        {memberToDelete.nama}
+      </div>
+      <p class="text-xs text-rose-600">
+        Peringatan: Seluruh data riwayat tagihan iuran yang terkait dengan anggota ini akan ikut terhapus.
+      </p>
     </div>
-    <p class="text-xs text-rose-600">
-      Peringatan: Seluruh data riwayat tagihan iuran yang terkait dengan anggota ini akan ikut terhapus.
-    </p>
   {/if}
 </Modal>
 
@@ -408,20 +393,22 @@
 <Modal
   open={isStatusModalOpen}
   title="Konfirmasi Ubah Status Keaktifan"
-  confirmText="Ubah Status"
-  cancelText="Batal"
-  confirmVariant="primary"
+  confirmLabel="Ubah Status"
+  cancelLabel="Batal"
+  variant={MODAL_VARIANTS.PRIMARY}
   loading={isToggling}
   onclose={() => (isStatusModalOpen = false)}
   onconfirm={confirmToggleStatus}
 >
   {#if memberToToggle}
-    <p class="text-sm text-slate-600">
-      Ubah status <strong>{memberToToggle.nama}</strong> menjadi
-      <strong>{memberToToggle.aktif === 1 ? 'Nonaktif' : 'Aktif'}</strong>?
-    </p>
-    <p class="text-xs text-slate-500">
-      Anggota yang nonaktif tidak akan dimasukkan ke dalam pembuatan tagihan iuran baru secara massal.
-    </p>
+    <div class="space-y-2">
+      <p class="text-sm text-slate-600">
+        Ubah status <strong>{memberToToggle.nama}</strong> menjadi
+        <strong>{memberToToggle.aktif === 1 ? 'Nonaktif' : 'Aktif'}</strong>?
+      </p>
+      <p class="text-xs text-slate-500">
+        Anggota yang nonaktif tidak akan dimasukkan ke dalam pembuatan tagihan iuran baru secara massal.
+      </p>
+    </div>
   {/if}
 </Modal>

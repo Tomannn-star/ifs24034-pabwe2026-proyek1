@@ -65,3 +65,4 @@ export const authService = {
     auth.logout(redirect);
   }
 };
+

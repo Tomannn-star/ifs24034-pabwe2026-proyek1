@@ -5,28 +5,25 @@
   import { validateName, validateUsername, validatePassword, validatePhone } from "$lib/utils/validators.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
+  import { ROUTES, USER_ROLES, APP_CONFIG } from "$lib/constants/index.js";
   import Button from "$lib/components/Button.svelte";
+  import Input from "$lib/components/Input.svelte";
   import {
     Wallet,
-    Eye,
-    EyeOff,
     AlertCircle,
     CheckCircle2,
     ShieldCheck,
     Coins,
     Sparkles,
     ArrowRight,
-    LogIn,
-    User,
-    Phone
+    LogIn
   } from "lucide-svelte";
 
   let nama = $state("");
   let username = $state("");
   let password = $state("");
   let kontak = $state("");
-  let role = $state("anggota");
-  let showPassword = $state(false);
+  let role = $state(USER_ROLES.ANGGOTA);
   let errorMessage = $state("");
   let isLoading = $state(false);
 
@@ -34,7 +31,7 @@
     // Jika sudah login, langsung arahkan ke dashboard
     const unsubscribe = auth.subscribe((state) => {
       if (state.token && state.user) {
-        goto("/");
+        goto(ROUTES.HOME);
       }
     });
     return unsubscribe;
@@ -83,7 +80,7 @@
       } else {
         await authService.login(username, password);
       }
-      goto("/");
+      goto(ROUTES.HOME);
     } catch (err) {
       errorMessage = extractErrorMessage(err, "Gagal melakukan registrasi");
     } finally {
@@ -93,7 +90,7 @@
 </script>
 
 <svelte:head>
-  <title>Daftar Akun Baru - KasPintar</title>
+  <title>Daftar Akun Baru - {APP_CONFIG.NAME}</title>
   <meta name="description" content="Pendaftaran akun pengguna baru sistem kas kelas KasPintar." />
 </svelte:head>
 
@@ -120,13 +117,13 @@
             <Wallet class="w-6 h-6 text-teal-800" aria-hidden="true" />
           </div>
           <div>
-            <h1 class="text-2xl font-extrabold tracking-tight text-white leading-none">KasPintar</h1>
+            <h1 class="text-2xl font-extrabold tracking-tight text-white leading-none">{APP_CONFIG.NAME}</h1>
             <p class="text-xs text-teal-100 font-medium mt-1">Registrasi Akun Anggota Baru</p>
           </div>
         </div>
       </div>
 
-      <!-- Keuntungan Bergabung -->
+      <!-- Feature Bullets -->
       <div class="relative z-10 my-8 space-y-4">
         <div class="flex items-start gap-3">
           <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
@@ -193,101 +190,52 @@
         {/if}
 
         <form onsubmit={handleRegister} class="space-y-3.5">
-          <!-- Input Nama Lengkap -->
-          <div class="space-y-1">
-            <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Nama Lengkap <span class="text-rose-500">*</span>
-            </label>
-            <div class="relative">
-              <input
-                id="name"
-                name="name"
-                type="text"
-                bind:value={nama}
-                placeholder="Contoh: Toman Sihombing"
-                required
-                aria-label="Nama Lengkap"
-                class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
-              />
-              <input
-                type="hidden"
-                id="nama"
-                name="nama"
-                bind:value={nama}
-              />
-              <User class="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
-            </div>
-          </div>
+          <!-- Input Nama Lengkap menggunakan Komponen Reusable Input -->
+          <Input
+            id="name"
+            name="name"
+            label="Nama Lengkap"
+            bind:value={nama}
+            placeholder="Contoh: Toman Sihombing"
+            required
+            aria-label="Nama Lengkap"
+          />
+          <input type="hidden" id="nama" name="nama" bind:value={nama} />
 
-          <!-- Input Username -->
-          <div class="space-y-1">
-            <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Username <span class="text-rose-500">*</span>
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              bind:value={username}
-              placeholder="Contoh: toman2026 (min. 3 karakter)"
-              required
-              autocomplete="username"
-              aria-label="Username"
-              class="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
-            />
-          </div>
+          <!-- Input Username menggunakan Komponen Reusable Input -->
+          <Input
+            id="username"
+            name="username"
+            label="Username"
+            bind:value={username}
+            placeholder="Contoh: toman2026 (min. 3 karakter)"
+            required
+            autocomplete="username"
+            aria-label="Username"
+          />
 
-          <!-- Input Password -->
-          <div class="space-y-1">
-            <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Password <span class="text-rose-500">*</span>
-            </label>
-            <div class="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                bind:value={password}
-                placeholder="Minimal 6 karakter"
-                required
-                autocomplete="new-password"
-                aria-label="Password"
-                class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
-              />
-              <button
-                type="button"
-                onclick={() => (showPassword = !showPassword)}
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 p-1 rounded-lg transition"
-                title={showPassword ? "Sembunyikan password" : "Lihat password"}
-                aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
-              >
-                {#if showPassword}
-                  <EyeOff class="w-4 h-4" aria-hidden="true" />
-                {:else}
-                  <Eye class="w-4 h-4" aria-hidden="true" />
-                {/if}
-              </button>
-            </div>
-          </div>
+          <!-- Input Password menggunakan Komponen Reusable Input -->
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            label="Password"
+            bind:value={password}
+            placeholder="Minimal 6 karakter"
+            required
+            autocomplete="new-password"
+            aria-label="Password"
+          />
 
-          <!-- Input Kontak (Opsional) -->
-          <div class="space-y-1">
-            <label for="kontak" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              No. WhatsApp / HP <span class="text-slate-600 font-normal normal-case">(Opsional)</span>
-            </label>
-            <div class="relative">
-              <input
-                id="kontak"
-                name="kontak"
-                type="text"
-                bind:value={kontak}
-                placeholder="Contoh: 081234567890"
-                aria-label="No WhatsApp atau HP"
-                class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
-              />
-              <Phone class="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
-            </div>
-          </div>
+          <!-- Input Kontak menggunakan Komponen Reusable Input -->
+          <Input
+            id="kontak"
+            name="kontak"
+            label="No. WhatsApp / HP (Opsional)"
+            bind:value={kontak}
+            placeholder="Contoh: 081234567890"
+            aria-label="No WhatsApp atau HP"
+          />
 
           <!-- Pilihan Role -->
           <div class="space-y-1">
@@ -295,12 +243,12 @@
               Peran Pengguna (Role)
             </span>
             <div class="grid grid-cols-2 gap-2">
-              <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === 'anggota' ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
-                <input type="radio" bind:group={role} value="anggota" class="text-teal-700 focus:ring-teal-700" />
+              <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === USER_ROLES.ANGGOTA ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <input type="radio" bind:group={role} value={USER_ROLES.ANGGOTA} class="text-teal-700 focus:ring-teal-700" />
                 <span class="text-xs">Anggota Kelas</span>
               </label>
-              <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === 'bendahara' ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
-                <input type="radio" bind:group={role} value="bendahara" class="text-teal-700 focus:ring-teal-700" />
+              <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === USER_ROLES.BENDAHARA ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <input type="radio" bind:group={role} value={USER_ROLES.BENDAHARA} class="text-teal-700 focus:ring-teal-700" />
                 <span class="text-xs">Bendahara</span>
               </label>
             </div>
@@ -308,24 +256,21 @@
 
           <!-- Tombol Submit (Selector #btn-submit untuk Grader Delcom) -->
           <div class="pt-2">
-            <button
+            <Button
               id="btn-submit"
               name="btn-submit"
               type="submit"
+              variant="primary"
+              size="lg"
+              loading={isLoading}
               disabled={isLoading}
-              class="w-full inline-flex items-center justify-center font-semibold transition-all duration-150 cursor-pointer select-none bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-sm hover:shadow-md px-5 py-2.5 text-base rounded-xl gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full shadow-sm hover:shadow-md"
             >
-              {#if isLoading}
-                <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Mendaftarkan Akun...</span>
-              {:else}
+              {#if !isLoading}
                 <span>Daftar Akun Sekarang</span>
                 <ArrowRight class="w-4 h-4 ml-1" aria-hidden="true" />
               {/if}
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -333,7 +278,7 @@
         <div class="mt-4 text-center">
           <p class="text-xs text-slate-600">
             Sudah memiliki akun?
-            <a href="/auth/login" class="font-bold text-teal-700 hover:text-teal-800 hover:underline inline-flex items-center gap-1">
+            <a href={ROUTES.LOGIN} class="font-bold text-teal-700 hover:text-teal-800 hover:underline inline-flex items-center gap-1">
               <LogIn class="w-3.5 h-3.5" aria-hidden="true" />
               <span>Masuk di sini</span>
             </a>

@@ -2,7 +2,8 @@
   import { onMount, onDestroy } from "svelte";
   import Chart from "chart.js/auto";
   import { transactionService } from "$lib/services/transactionService.js";
-  import { api } from "$lib/api.js";
+  import { duesService } from "$lib/services/duesService.js";
+  import { ROUTES, USER_ROLES } from "$lib/constants/index.js";
   import { auth } from "$lib/stores/auth.js";
   import { formatRupiah, formatTanggal, formatPeriode } from "$lib/utils/format.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
@@ -57,7 +58,7 @@
     try {
       const [summaryRes, remindersRes] = await Promise.all([
         transactionService.getSummary(),
-        api.get("reminders")
+        duesService.getMyReminders()
       ]);
 
       summaryData = summaryRes;
@@ -205,9 +206,9 @@
         Halo, <strong class="text-slate-800 font-semibold">{currentUser?.nama || currentUser?.username}</strong>. Selamat datang kembali di sistem KasPintar.
       </p>
     </div>
-    {#if currentUser?.role === "bendahara"}
+    {#if currentUser?.role === USER_ROLES.BENDAHARA}
       <div class="flex items-center gap-2">
-        <a href="/transaksi/baru">
+        <a href={ROUTES.TRANSAKSI_BARU}>
           <Button variant="primary" size="md">
             <Plus class="w-4 h-4 mr-1.5" />
             <span>Catat Transaksi</span>
@@ -266,7 +267,7 @@
               </p>
             </div>
           </div>
-          <a href="/iuran" class="shrink-0">
+          <a href={ROUTES.IURAN} class="shrink-0">
             <Button variant="danger" size="sm">
               <span>Lihat Iuran Saya</span>
               <ChevronRight class="w-4 h-4 ml-1" aria-hidden="true" />
@@ -289,7 +290,7 @@
               </p>
             </div>
           </div>
-          <a href="/iuran" class="shrink-0">
+          <a href={ROUTES.IURAN} class="shrink-0">
             <Button variant="secondary" size="sm">
               <span>Lihat Iuran Saya</span>
               <ChevronRight class="w-4 h-4 ml-1" aria-hidden="true" />
@@ -300,7 +301,7 @@
     {/if}
 
     <!-- Banner Ringkasan Penunggak untuk Bendahara -->
-    {#if currentUser?.role === "bendahara" && summaryData?.total_penunggak > 0}
+    {#if currentUser?.role === USER_ROLES.BENDAHARA && summaryData?.total_penunggak > 0}
       <div class="p-5 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-rose-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
         <div class="flex items-center gap-4 min-w-0">
           <div class="w-11 h-11 bg-amber-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
@@ -315,7 +316,7 @@
             </p>
           </div>
         </div>
-        <a href="/penunggak" class="shrink-0">
+        <a href={ROUTES.PENUNGGAK} class="shrink-0">
           <Button variant="secondary" size="sm">
             <span>Daftar Penunggak</span>
             <ChevronRight class="w-4 h-4 ml-1" aria-hidden="true" />
@@ -395,7 +396,7 @@
           <h2 class="font-extrabold text-slate-900 text-base">5 Transaksi Terakhir</h2>
           <p class="text-xs text-slate-500 mt-0.5">Catatan mutasi kas paling baru</p>
         </div>
-        <a href="/transaksi" class="text-xs font-bold text-teal-700 hover:text-teal-900 transition flex items-center gap-1">
+        <a href={ROUTES.TRANSAKSI} class="text-xs font-bold text-teal-700 hover:text-teal-900 transition flex items-center gap-1">
           <span>Buka Semua Transaksi</span>
           <ChevronRight class="w-3.5 h-3.5" />
         </a>

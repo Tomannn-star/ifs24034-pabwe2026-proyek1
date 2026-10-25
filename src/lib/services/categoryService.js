@@ -1,9 +1,11 @@
 /**
  * @fileoverview Service Manajemen Kategori KasPintar
- * Menangani operasi CRUD kategori pos kas (pemasukan & pengeluaran).
+ * Menangani operasi CRUD kategori pos kas (pemasukan & pengeluaran)
+ * dengan pengamanan otorisasi peran Bendahara pada layer logika bisnis.
  */
 
 import { api } from "../api.js";
+import { assertBendahara } from "./guardService.js";
 
 export const categoryService = {
   /**
@@ -18,7 +20,7 @@ export const categoryService = {
   },
 
   /**
-   * Menambahkan kategori pos kas baru.
+   * Menambahkan kategori pos kas baru (khusus Bendahara).
    * 
    * @param {Object} data
    * @param {string} data.nama - Nama kategori
@@ -27,6 +29,7 @@ export const categoryService = {
    * @returns {Promise<{ message: string, data: any }>}
    */
   async createCategory(data) {
+    assertBendahara("Menambahkan kategori pos kas");
     return await api.post("categories", {
       nama: data.nama.trim(),
       jenis: data.jenis,
@@ -35,13 +38,14 @@ export const categoryService = {
   },
 
   /**
-   * Memperbarui informasi kategori pos kas.
+   * Memperbarui informasi kategori pos kas (khusus Bendahara).
    * 
    * @param {number|string} id
    * @param {Object} data
    * @returns {Promise<{ message: string, data: any }>}
    */
   async updateCategory(id, data) {
+    assertBendahara("Memperbarui kategori pos kas");
     return await api.put(`categories/${id}`, {
       nama: data.nama.trim(),
       jenis: data.jenis,
@@ -50,12 +54,13 @@ export const categoryService = {
   },
 
   /**
-   * Menghapus kategori pos kas berdasarkan ID.
+   * Menghapus kategori pos kas berdasarkan ID (khusus Bendahara).
    * 
    * @param {number|string} id
    * @returns {Promise<{ message: string }>}
    */
   async deleteCategory(id) {
+    assertBendahara("Menghapus kategori pos kas");
     return await api.delete(`categories/${id}`);
   }
 };

@@ -1,38 +1,54 @@
 <script>
   import Button from "./Button.svelte";
+  import { MODAL_VARIANTS } from "$lib/constants/index.js";
 
   /**
-   * Komponen Modal konfirmasi
+   * Komponen Modal konfirmasi & dialog interaktif modern
+   * Menyediakan kontrak props yang konsisten untuk seluruh halaman.
+   * 
    * @type {{
    *   open: boolean,
-   *   title: string,
+   *   title?: string,
    *   message?: string,
    *   confirmLabel?: string,
    *   cancelLabel?: string,
-   *   variant?: 'danger' | 'primary',
+   *   confirmText?: string,
+   *   cancelText?: string,
+   *   variant?: 'primary' | 'danger' | 'warning',
+   *   confirmVariant?: 'primary' | 'danger' | 'warning',
    *   loading?: boolean,
    *   onconfirm?: () => void,
    *   oncancel?: () => void,
+   *   onclose?: () => void,
    *   children?: import('svelte').Snippet
    * }}
    */
   let {
     open = $bindable(false),
-    title = "Konfirmasi",
+    title = "Konfirmasi Tindakan",
     message = "",
-    confirmLabel = "Ya, Lanjutkan",
-    cancelLabel = "Batal",
-    variant = "primary",
+    confirmLabel,
+    cancelLabel,
+    confirmText = "Ya, Lanjutkan",
+    cancelText = "Batal",
+    variant = MODAL_VARIANTS.PRIMARY,
+    confirmVariant,
     loading = false,
     onconfirm,
     oncancel,
+    onclose,
     children
   } = $props();
+
+  let effectiveConfirmLabel = $derived(confirmLabel || confirmText);
+  let effectiveCancelLabel = $derived(cancelLabel || cancelText);
+  let effectiveVariant = $derived(confirmVariant || variant);
 
   function handleClose() {
     if (loading) return;
     open = false;
     oncancel?.();
+    onclose?.();
   }
 
   function handleConfirm() {
@@ -88,18 +104,17 @@
           onclick={handleClose}
           disabled={loading}
         >
-          {cancelLabel}
+          {effectiveCancelLabel}
         </Button>
         <Button
-          variant={variant === "danger" ? "danger" : "primary"}
+          variant={effectiveVariant === MODAL_VARIANTS.DANGER ? "danger" : "primary"}
           size="md"
           onclick={handleConfirm}
           {loading}
         >
-          {confirmLabel}
+          {effectiveConfirmLabel}
         </Button>
       </div>
     </div>
   </div>
 {/if}
-

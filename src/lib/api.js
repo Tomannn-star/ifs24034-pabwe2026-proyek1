@@ -1,5 +1,7 @@
 import { auth } from "./stores/auth.js";
+import { tokenService } from "./services/tokenService.js";
 import { browser } from "$app/environment";
+import { ROUTES } from "$lib/constants/index.js";
 
 // Ambil URL API dari environment variable (PUBLIC_API_URL atau VITE_API_URL)
 const envApiUrl = import.meta.env.PUBLIC_API_URL || 
@@ -24,7 +26,7 @@ export function getBaseUrl() {
 
 /**
  * Helper request HTTP terpusat untuk KasPintar.
- * Otomatis menyertakan token JWT pada header Authorization.
+ * Otomatis menyertakan token JWT pada header Authorization melalui tokenService.
  * Menangani respon 401 Unauthorized dengan otomatis logout.
  * 
  * @param {string} endpoint - Path endpoint (misal '/summary' atau '/transactions')
@@ -35,10 +37,7 @@ export async function apiRequest(endpoint, options = {}) {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}/${endpoint.replace(/^\//, "")}`;
 
-  let token = null;
-  if (browser) {
-    token = localStorage.getItem("kaspintar_token");
-  }
+  const token = tokenService.getToken();
 
   const headers = {
     "Content-Type": "application/json",
@@ -94,4 +93,3 @@ export const api = {
     }),
   delete: (endpoint) => apiRequest(endpoint, { method: "DELETE" })
 };
-

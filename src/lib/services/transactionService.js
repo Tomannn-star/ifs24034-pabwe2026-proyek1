@@ -1,10 +1,12 @@
 /**
  * @fileoverview Service Manajemen Transaksi Keuangan KasPintar
  * Menangani pencatatan mutasi kas masuk & keluar, ringkasan saldo,
- * grafik bulanan, paginasi, dan filter transaksi.
+ * grafik bulanan, paginasi, dan filter transaksi
+ * dengan pengamanan otorisasi peran Bendahara pada layer logika bisnis.
  */
 
 import { api } from "../api.js";
+import { assertBendahara } from "./guardService.js";
 
 export const transactionService = {
   /**
@@ -54,7 +56,7 @@ export const transactionService = {
   },
 
   /**
-   * Mencatat transaksi kas baru (pemasukan atau pengeluaran).
+   * Mencatat transaksi kas baru (pemasukan atau pengeluaran, khusus Bendahara).
    * 
    * @param {Object} data
    * @param {string} data.jenis - 'masuk' atau 'keluar'
@@ -66,6 +68,7 @@ export const transactionService = {
    * @returns {Promise<{ message: string, data: any }>}
    */
   async createTransaction(data) {
+    assertBendahara("Mencatat transaksi kas baru");
     return await api.post("transactions", {
       jenis: data.jenis,
       kategori_id: Number(data.kategori_id),
@@ -77,13 +80,14 @@ export const transactionService = {
   },
 
   /**
-   * Memperbarui informasi data transaksi yang sudah tercatat.
+   * Memperbarui informasi data transaksi yang sudah tercatat (khusus Bendahara).
    * 
    * @param {number|string} id
    * @param {Object} data
    * @returns {Promise<{ message: string, data: any }>}
    */
   async updateTransaction(id, data) {
+    assertBendahara("Memperbarui transaksi kas");
     return await api.put(`transactions/${id}`, {
       jenis: data.jenis,
       kategori_id: Number(data.kategori_id),
@@ -95,12 +99,13 @@ export const transactionService = {
   },
 
   /**
-   * Menghapus transaksi kas berdasarkan ID.
+   * Menghapus transaksi kas berdasarkan ID (khusus Bendahara).
    * 
    * @param {number|string} id
    * @returns {Promise<{ message: string }>}
    */
   async deleteTransaction(id) {
+    assertBendahara("Menghapus transaksi kas");
     return await api.delete(`transactions/${id}`);
   }
 };

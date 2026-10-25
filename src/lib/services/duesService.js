@@ -1,10 +1,12 @@
 /**
  * @fileoverview Service Manajemen Iuran & Penunggak KasPintar
  * Menangani pembuatan tagihan kas bulanan secara massal, pelunasan iuran,
- * monitoring status lunas/belum lunas, dan daftar penunggak.
+ * monitoring status lunas/belum lunas, dan daftar penunggak
+ * dengan pengamanan otorisasi peran Bendahara pada layer logika bisnis.
  */
 
 import { api } from "../api.js";
+import { assertBendahara } from "./guardService.js";
 
 export const duesService = {
   /**
@@ -27,7 +29,7 @@ export const duesService = {
   },
 
   /**
-   * Menghasilkan tagihan iuran massal untuk seluruh anggota aktif pada periode tertentu.
+   * Menghasilkan tagihan iuran massal untuk seluruh anggota aktif pada periode tertentu (khusus Bendahara).
    * 
    * @param {Object} payload
    * @param {string} payload.periode - Format YYYY-MM (misal "2026-10")
@@ -36,6 +38,7 @@ export const duesService = {
    * @returns {Promise<{ message: string, generated_count: number }>}
    */
   async generateMonthlyDues(payload) {
+    assertBendahara("Membuat tagihan iuran massal");
     return await api.post("dues/generate", {
       periode: payload.periode,
       nominal: Number(payload.nominal),
@@ -44,7 +47,7 @@ export const duesService = {
   },
 
   /**
-   * Mencatat pelunasan pembayaran tagihan iuran oleh anggota.
+   * Mencatat pelunasan pembayaran tagihan iuran oleh anggota (khusus Bendahara).
    * 
    * @param {number|string} dueId - ID tagihan iuran
    * @param {Object} [options] - Opsi tambahan
@@ -52,6 +55,7 @@ export const duesService = {
    * @returns {Promise<{ message: string, transaction: any }>}
    */
   async payDues(dueId, options = {}) {
+    assertBendahara("Mencatat pelunasan iuran kas");
     return await api.post(`dues/${dueId}/pay`, options);
   },
 

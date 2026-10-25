@@ -4,6 +4,7 @@
   import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatPeriode, formatTanggal } from "$lib/utils/format.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
+  import { ROUTES } from "$lib/constants/index.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import StatCard from "$lib/components/StatCard.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -164,7 +165,7 @@
                   <div class="text-lg font-extrabold text-rose-600 tabular-nums">{formatRupiah(p.total_tunggakan)}</div>
                 </div>
 
-                <a href="/iuran">
+                <a href={ROUTES.IURAN}>
                   <Button variant="secondary" size="sm">
                     <span>Kelola Iuran</span>
                     <ChevronRight class="w-3.5 h-3.5 ml-1" />

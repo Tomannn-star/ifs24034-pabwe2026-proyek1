@@ -10,5 +10,6 @@ export * from "./stores/toast.js";
 export * from "./utils/format.js";
 export * from "./utils/validators.js";
 export * from "./utils/errorHandler.js";
+export * from "./utils/cookies.js";
 export * from "./constants/index.js";
 export { api, apiRequest, getBaseUrl } from "./api.js";

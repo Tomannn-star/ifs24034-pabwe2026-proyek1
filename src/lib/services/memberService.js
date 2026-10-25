@@ -1,9 +1,11 @@
 /**
  * @fileoverview Service Manajemen Anggota Kelas KasPintar
- * Menangani operasi CRUD (Create, Read, Update, Delete) data anggota kas kelas.
+ * Menangani operasi CRUD (Create, Read, Update, Delete) data anggota kas kelas
+ * dengan pengamanan otorisasi peran Bendahara pada layer logika bisnis.
  */
 
 import { api } from "../api.js";
+import { assertBendahara } from "./guardService.js";
 
 export const memberService = {
   /**
@@ -37,7 +39,7 @@ export const memberService = {
   },
 
   /**
-   * Menambahkan data anggota baru.
+   * Menambahkan data anggota baru (khusus Bendahara).
    * 
    * @param {Object} data
    * @param {string} data.nama - Nama lengkap anggota
@@ -46,6 +48,7 @@ export const memberService = {
    * @returns {Promise<{ message: string, data: any }>}
    */
   async createMember(data) {
+    assertBendahara("Menambahkan anggota baru");
     return await api.post("members", {
       nama: data.nama.trim(),
       kontak: data.kontak?.trim() || null,
@@ -54,13 +57,14 @@ export const memberService = {
   },
 
   /**
-   * Memperbarui informasi data anggota yang sudah ada.
+   * Memperbarui informasi data anggota yang sudah ada (khusus Bendahara).
    * 
    * @param {number|string} id
    * @param {Object} data
    * @returns {Promise<{ message: string, data: any }>}
    */
   async updateMember(id, data) {
+    assertBendahara("Memperbarui data anggota");
     return await api.put(`members/${id}`, {
       nama: data.nama.trim(),
       kontak: data.kontak?.trim() || null,
@@ -69,12 +73,13 @@ export const memberService = {
   },
 
   /**
-   * Mengubah status keaktifan anggota secara cepat (toggle).
+   * Mengubah status keaktifan anggota secara cepat (toggle, khusus Bendahara).
    * 
    * @param {Object} member - Objek anggota
    * @returns {Promise<{ message: string, data: any }>}
    */
   async toggleStatus(member) {
+    assertBendahara("Mengubah status keaktifan anggota");
     const nextStatus = member.aktif === 1 ? 0 : 1;
     return await api.put(`members/${member.id}`, {
       nama: member.nama,
@@ -84,12 +89,13 @@ export const memberService = {
   },
 
   /**
-   * Menghapus data anggota berdasarkan ID.
+   * Menghapus data anggota berdasarkan ID (khusus Bendahara).
    * 
    * @param {number|string} id
    * @returns {Promise<{ message: string }>}
    */
   async deleteMember(id) {
+    assertBendahara("Menghapus data anggota");
     return await api.delete(`members/${id}`);
   }
 };

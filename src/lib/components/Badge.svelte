@@ -1,8 +1,12 @@
 <script>
+  import { BADGE_VARIANTS } from "$lib/constants/index.js";
+
   /**
-   * Komponen Badge modern
+   * Komponen Badge status modern
+   * Mendukung seluruh varian status finansial dan peran pengguna secara lengkap.
+   * 
    * @type {{
-   *   variant?: 'success' | 'danger' | 'warning' | 'neutral' | 'info',
+   *   variant?: 'success' | 'danger' | 'warning' | 'amber' | 'info' | 'primary' | 'neutral',
    *   size?: 'sm' | 'md',
    *   dot?: boolean,
    *   class?: string,
@@ -10,7 +14,7 @@
    * }}
    */
   let {
-    variant = "neutral",
+    variant = BADGE_VARIANTS.NEUTRAL,
     size = "md",
     dot = false,
     class: customClass = "",
@@ -19,19 +23,23 @@
   } = $props();
 
   const variantClasses = {
-    success: "bg-teal-50 text-teal-800 border-teal-200/80",
-    danger: "bg-rose-50 text-rose-800 border-rose-200/80",
-    warning: "bg-amber-50 text-amber-800 border-amber-200/80",
-    info: "bg-sky-50 text-sky-800 border-sky-200/80",
-    neutral: "bg-slate-100 text-slate-700 border-slate-200/80"
+    [BADGE_VARIANTS.SUCCESS]: "bg-teal-50 text-teal-800 border-teal-200/80",
+    [BADGE_VARIANTS.DANGER]: "bg-rose-50 text-rose-800 border-rose-200/80",
+    [BADGE_VARIANTS.WARNING]: "bg-amber-50 text-amber-800 border-amber-200/80",
+    [BADGE_VARIANTS.AMBER]: "bg-amber-50 text-amber-800 border-amber-200/80",
+    [BADGE_VARIANTS.INFO]: "bg-sky-50 text-sky-800 border-sky-200/80",
+    [BADGE_VARIANTS.PRIMARY]: "bg-teal-50 text-teal-900 border-teal-300",
+    [BADGE_VARIANTS.NEUTRAL]: "bg-slate-100 text-slate-700 border-slate-200/80"
   };
 
   const dotClasses = {
-    success: "bg-teal-500",
-    danger: "bg-rose-500",
-    warning: "bg-amber-500",
-    info: "bg-sky-500",
-    neutral: "bg-slate-400"
+    [BADGE_VARIANTS.SUCCESS]: "bg-teal-500",
+    [BADGE_VARIANTS.DANGER]: "bg-rose-500",
+    [BADGE_VARIANTS.WARNING]: "bg-amber-500",
+    [BADGE_VARIANTS.AMBER]: "bg-amber-500",
+    [BADGE_VARIANTS.INFO]: "bg-sky-500",
+    [BADGE_VARIANTS.PRIMARY]: "bg-teal-700",
+    [BADGE_VARIANTS.NEUTRAL]: "bg-slate-400"
   };
 
   const sizeClasses = {
@@ -41,12 +49,11 @@
 </script>
 
 <span
-  class="inline-flex items-center gap-1.5 font-semibold rounded-full border transition-colors {variantClasses[variant] || variantClasses.neutral} {sizeClasses[size] || sizeClasses.md} {customClass}"
+  class="inline-flex items-center gap-1.5 font-semibold rounded-full border transition-colors {variantClasses[variant] || variantClasses[BADGE_VARIANTS.NEUTRAL]} {sizeClasses[size] || sizeClasses.md} {customClass}"
   {...rest}
 >
   {#if dot}
-    <span class="w-1.5 h-1.5 rounded-full shrink-0 {dotClasses[variant] || dotClasses.neutral}"></span>
+    <span class="w-1.5 h-1.5 rounded-full shrink-0 {dotClasses[variant] || dotClasses[BADGE_VARIANTS.NEUTRAL]}"></span>
   {/if}
   {@render children?.()}
 </span>
-

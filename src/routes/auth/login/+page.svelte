@@ -5,11 +5,11 @@
   import { validateUsername, validatePassword } from "$lib/utils/validators.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
+  import { ROUTES, APP_CONFIG } from "$lib/constants/index.js";
   import Button from "$lib/components/Button.svelte";
+  import Input from "$lib/components/Input.svelte";
   import {
     Wallet,
-    Eye,
-    EyeOff,
     AlertCircle,
     CheckCircle2,
     ShieldCheck,
@@ -21,7 +21,6 @@
 
   let username = $state("");
   let password = $state("");
-  let showPassword = $state(false);
   let errorMessage = $state("");
   let isLoading = $state(false);
 
@@ -29,7 +28,7 @@
     // Jika sudah login, langsung arahkan ke dashboard
     const unsubscribe = auth.subscribe((state) => {
       if (state.token && state.user) {
-        goto("/");
+        goto(ROUTES.HOME);
       }
     });
     return unsubscribe;
@@ -54,7 +53,7 @@
     isLoading = true;
     try {
       await authService.login(username, password);
-      goto("/");
+      goto(ROUTES.HOME);
     } catch (err) {
       errorMessage = extractErrorMessage(err, "Username atau password salah");
     } finally {
@@ -71,7 +70,7 @@
 </script>
 
 <svelte:head>
-  <title>Masuk - KasPintar</title>
+  <title>Masuk - {APP_CONFIG.NAME}</title>
   <meta name="description" content="Masuk ke akun KasPintar untuk mengelola dan memantau uang kas kelas." />
 </svelte:head>
 
@@ -82,7 +81,7 @@
     <!-- KOLOM KIRI (Brand Showcase Fintech Panel)                 -->
     <!-- ========================================================= -->
     <div class="lg:col-span-5 bg-gradient-to-br from-teal-900 via-teal-800 to-emerald-950 p-8 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden">
-      <!-- Dekorasi Latar Halus -->
+      <!-- Latar Halus -->
       <div class="absolute -top-24 -left-24 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -98,7 +97,7 @@
             <Wallet class="w-6 h-6 text-teal-800" aria-hidden="true" />
           </div>
           <div>
-            <h1 class="text-2xl font-extrabold tracking-tight text-white leading-none">KasPintar</h1>
+            <h1 class="text-2xl font-extrabold tracking-tight text-white leading-none">{APP_CONFIG.NAME}</h1>
             <p class="text-xs text-teal-100 font-medium mt-1">Transparansi Keuangan Kelas</p>
           </div>
         </div>
@@ -171,77 +170,48 @@
         {/if}
 
         <form onsubmit={handleLogin} class="space-y-4">
-          <!-- Input Username -->
-          <div class="space-y-1.5">
-            <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Username
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              bind:value={username}
-              placeholder="Contoh: bendahara atau anggota1"
-              required
-              autocomplete="username"
-              aria-label="Username"
-              class="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
-            />
-          </div>
+          <!-- Input Username menggunakan Komponen Reusable Input -->
+          <Input
+            id="username"
+            name="username"
+            label="Username"
+            bind:value={username}
+            placeholder="Contoh: bendahara atau anggota1"
+            required
+            autocomplete="username"
+            aria-label="Username"
+          />
 
-          <!-- Input Password dengan Toggle Lihat/Sembunyikan -->
-          <div class="space-y-1.5">
-            <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Password
-            </label>
-            <div class="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                bind:value={password}
-                placeholder="Masukkan kata sandi akun"
-                required
-                autocomplete="current-password"
-                aria-label="Password"
-                class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
-              />
-              <button
-                type="button"
-                onclick={() => (showPassword = !showPassword)}
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 p-1 rounded-lg transition"
-                title={showPassword ? "Sembunyikan password" : "Lihat password"}
-                aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
-              >
-                {#if showPassword}
-                  <EyeOff class="w-4 h-4" aria-hidden="true" />
-                {:else}
-                  <Eye class="w-4 h-4" aria-hidden="true" />
-                {/if}
-              </button>
-            </div>
-          </div>
+          <!-- Input Password menggunakan Komponen Reusable Input -->
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            label="Password"
+            bind:value={password}
+            placeholder="Masukkan kata sandi akun"
+            required
+            autocomplete="current-password"
+            aria-label="Password"
+          />
 
           <!-- Tombol Submit (Selector #btn-submit untuk Grader Delcom) -->
           <div class="pt-2">
-            <button
+            <Button
               id="btn-submit"
               name="btn-submit"
               type="submit"
+              variant="primary"
+              size="lg"
+              loading={isLoading}
               disabled={isLoading}
-              class="w-full inline-flex items-center justify-center font-semibold transition-all duration-150 cursor-pointer select-none bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-sm hover:shadow-md px-5 py-2.5 text-base rounded-xl gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full shadow-sm hover:shadow-md"
             >
-              {#if isLoading}
-                <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Memproses Autentikasi...</span>
-              {:else}
+              {#if !isLoading}
                 <span>Masuk ke KasPintar</span>
                 <ArrowRight class="w-4 h-4 ml-1" aria-hidden="true" />
               {/if}
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -249,7 +219,7 @@
         <div class="mt-4 text-center">
           <p class="text-xs text-slate-600">
             Belum memiliki akun?
-            <a href="/auth/register" class="font-bold text-teal-700 hover:text-teal-800 hover:underline inline-flex items-center gap-1">
+            <a href={ROUTES.REGISTER} class="font-bold text-teal-700 hover:text-teal-800 hover:underline inline-flex items-center gap-1">
               <UserPlus class="w-3.5 h-3.5" aria-hidden="true" />
               <span>Daftar akun baru di sini</span>
             </a>
@@ -320,4 +290,3 @@
 
   </div>
 </div>
-

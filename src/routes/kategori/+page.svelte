@@ -2,13 +2,16 @@
   import { onMount } from "svelte";
   import { categoryService } from "$lib/services/categoryService.js";
   import { toast } from "$lib/stores/toast.js";
-  import { validateKeterangan } from "$lib/utils/validators.js";
+  import { validateName } from "$lib/utils/validators.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
+  import { TRANSACTION_TYPES, BADGE_VARIANTS, MODAL_VARIANTS } from "$lib/constants/index.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import Badge from "$lib/components/Badge.svelte";
   import Modal from "$lib/components/Modal.svelte";
+  import Input from "$lib/components/Input.svelte";
+  import Select from "$lib/components/Select.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
   import {
     Tag,
@@ -21,15 +24,16 @@
 
   let categories = $state([]);
   let isLoading = $state(true);
+  let errorMessage = $state("");
 
-  // Form state
+  // Form State
   let isEditing = $state(false);
   let editId = $state(null);
   let nama = $state("");
-  let jenis = $state("masuk");
+  let jenis = $state(TRANSACTION_TYPES.MASUK);
   let isSaving = $state(false);
 
-  // Modal konfirmasi hapus
+  // Modal State untuk Hapus
   let isDeleteModalOpen = $state(false);
   let categoryToDelete = $state(null);
   let isDeleting = $state(false);
@@ -40,11 +44,13 @@
 
   async function loadCategories() {
     isLoading = true;
+    errorMessage = "";
     try {
       const res = await categoryService.getCategories();
       categories = res.data || [];
     } catch (err) {
-      toast.error(extractErrorMessage(err, "Gagal memuat kategori kas"));
+      errorMessage = extractErrorMessage(err, "Gagal memuat kategori pos kas");
+      toast.error(errorMessage);
     } finally {
       isLoading = false;
     }
@@ -55,20 +61,19 @@
     editId = cat.id;
     nama = cat.nama;
     jenis = cat.jenis;
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function cancelEdit() {
     isEditing = false;
     editId = null;
     nama = "";
-    jenis = "masuk";
+    jenis = TRANSACTION_TYPES.MASUK;
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
 
-    const nameErr = validateKeterangan(nama, true);
+    const nameErr = validateName(nama);
     if (nameErr) {
       toast.error(nameErr);
       return;
@@ -77,17 +82,11 @@
     isSaving = true;
     try {
       if (isEditing) {
-        await categoryService.updateCategory(editId, {
-          nama: nama.trim(),
-          jenis
-        });
+        await categoryService.updateCategory(editId, { nama, jenis });
         toast.success(`Kategori "${nama.trim()}" berhasil diperbarui`);
       } else {
-        await categoryService.createCategory({
-          nama: nama.trim(),
-          jenis
-        });
-        toast.success(`Kategori baru "${nama.trim()}" berhasil ditambahkan`);
+        await categoryService.createCategory({ nama, jenis });
+        toast.success(`Kategori "${nama.trim()}" berhasil ditambahkan`);
       }
 
       cancelEdit();
@@ -114,7 +113,7 @@
       categoryToDelete = null;
       loadCategories();
     } catch (err) {
-      toast.error(extractErrorMessage(err, "Gagal menghapus kategori"));
+      toast.error(extractErrorMessage(err, "Gagal menghapus pos kategori"));
     } finally {
       isDeleting = false;
     }
@@ -134,7 +133,7 @@
   />
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <!-- Form Tambah / Edit Kategori (4 Kolom di Desktop) -->
+    <!-- Form Tambah / Edit Kategori (5 Kolom di Desktop) -->
     <div class="lg:col-span-5 h-fit">
       <Card>
         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
@@ -151,33 +150,24 @@
         </div>
 
         <form onsubmit={handleSubmit} class="space-y-4">
-          <div class="space-y-1.5">
-            <label for="namaKategori" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Nama Pos Kategori
-            </label>
-            <input
-              id="namaKategori"
-              type="text"
-              bind:value={nama}
-              placeholder="Contoh: Dana Perlengkapan Kelas"
-              required
-              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-            />
-          </div>
+          <Input
+            id="namaKategori"
+            name="namaKategori"
+            label="Nama Pos Kategori"
+            bind:value={nama}
+            placeholder="Contoh: Dana Perlengkapan Kelas"
+            required
+          />
 
-          <div class="space-y-1.5">
-            <label for="jenisKategori" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Klasifikasi Jenis
-            </label>
-            <select
-              id="jenisKategori"
-              bind:value={jenis}
-              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-            >
-              <option value="masuk">Kas Masuk (Pemasukan)</option>
-              <option value="keluar">Kas Keluar (Pengeluaran)</option>
-            </select>
-          </div>
+          <Select
+            id="jenisKategori"
+            name="jenisKategori"
+            label="Klasifikasi Jenis"
+            bind:value={jenis}
+          >
+            <option value={TRANSACTION_TYPES.MASUK}>Kas Masuk (Pemasukan)</option>
+            <option value={TRANSACTION_TYPES.KELUAR}>Kas Keluar (Pengeluaran)</option>
+          </Select>
 
           <div class="pt-2 flex items-center gap-2">
             {#if isEditing}
@@ -244,13 +234,13 @@
                     {cat.nama}
                   </td>
                   <td class="py-3 px-4 whitespace-nowrap">
-                    {#if cat.jenis === 'masuk'}
-                      <Badge variant="success" size="sm">
+                    {#if cat.jenis === TRANSACTION_TYPES.MASUK}
+                      <Badge variant={BADGE_VARIANTS.SUCCESS} size="sm">
                         <ArrowDownLeft class="w-3.5 h-3.5 mr-1" />
                         <span>Pemasukan</span>
                       </Badge>
                     {:else}
-                      <Badge variant="danger" size="sm">
+                      <Badge variant={BADGE_VARIANTS.DANGER} size="sm">
                         <ArrowUpRight class="w-3.5 h-3.5 mr-1" />
                         <span>Pengeluaran</span>
                       </Badge>
@@ -290,22 +280,24 @@
 <Modal
   open={isDeleteModalOpen}
   title="Konfirmasi Hapus Kategori"
-  confirmText="Ya, Hapus Kategori"
-  cancelText="Batal"
-  confirmVariant="danger"
+  confirmLabel="Ya, Hapus Kategori"
+  cancelLabel="Batal"
+  variant={MODAL_VARIANTS.DANGER}
   loading={isDeleting}
   onclose={() => (isDeleteModalOpen = false)}
   onconfirm={confirmDelete}
 >
   {#if categoryToDelete}
-    <p class="text-sm text-slate-600">
-      Apakah kamu yakin ingin menghapus pos kategori:
-    </p>
-    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900">
-      {categoryToDelete.nama} ({categoryToDelete.jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran'})
+    <div class="space-y-3">
+      <p class="text-sm text-slate-600">
+        Apakah kamu yakin ingin menghapus pos kategori:
+      </p>
+      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900">
+        {categoryToDelete.nama} ({categoryToDelete.jenis === TRANSACTION_TYPES.MASUK ? 'Pemasukan' : 'Pengeluaran'})
+      </div>
+      <p class="text-xs text-rose-600">
+        Perhatian: Kategori tidak dapat dihapus jika masih ada catatan transaksi yang menggunakan pos ini.
+      </p>
     </div>
-    <p class="text-xs text-rose-600">
-      Perhatian: Kategori tidak dapat dihapus jika masih ada catatan transaksi yang menggunakan pos ini.
-    </p>
   {/if}
 </Modal>

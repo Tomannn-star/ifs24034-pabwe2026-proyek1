@@ -6,6 +6,7 @@
   import { toast } from "$lib/stores/toast.js";
   import { formatRupiah, formatTanggal } from "$lib/utils/format.js";
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
+  import { MODAL_VARIANTS, USER_ROLES } from "$lib/constants/index.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Button from "$lib/components/Button.svelte";
   import Badge from "$lib/components/Badge.svelte";
@@ -427,9 +428,9 @@
 <Modal
   open={isDeleteModalOpen}
   title="Konfirmasi Hapus Transaksi"
-  confirmText="Ya, Hapus Transaksi"
-  cancelText="Batal"
-  confirmVariant="danger"
+  confirmLabel="Ya, Hapus Transaksi"
+  cancelLabel="Batal"
+  variant={MODAL_VARIANTS.DANGER}
   loading={isDeleting}
   onclose={() => (isDeleteModalOpen = false)}
   onconfirm={confirmDelete}

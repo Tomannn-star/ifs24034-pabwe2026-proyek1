@@ -1,8 +1,9 @@
 <script>
   /**
-   * Komponen Select dropdown modern
+   * Komponen Select dropdown modern dan aksesibel
    * @type {{
    *   id?: string,
+   *   name?: string,
    *   label?: string,
    *   value?: any,
    *   hint?: string,
@@ -16,6 +17,7 @@
    */
   let {
     id = "select-" + Math.random().toString(36).substring(2, 9),
+    name = "",
     label = "",
     value = $bindable(""),
     hint = "",
@@ -42,6 +44,7 @@
   <div class="relative">
     <select
       {id}
+      name={name || id}
       bind:value
       {required}
       {disabled}
@@ -55,7 +58,7 @@
     </select>
 
     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-600">
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
@@ -71,4 +74,3 @@
     </p>
   {/if}
 </div>
-

@@ -55,3 +55,4 @@ describe("Input Validation & Security Utilities", () => {
     expect(sanitizeInput("<b>Bold Text</b>")).toBe("Bold Text");
   });
 });
+

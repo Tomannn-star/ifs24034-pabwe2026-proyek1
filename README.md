@@ -24,37 +24,42 @@ Aplikasi dirancang dengan arsitektur modular berlapis (*Layered Architecture*) u
 
 ```
 src/
-├── app.html                  # HTML entrypoint (meta description, viewport, title)
+├── app.html                  # HTML entrypoint (meta description, viewport, title, landmarks)
+├── hooks.server.js           # Server-side guard hook (ekstraksi session dari Cookie & security headers)
 ├── lib/
-│   ├── api.js                # Core HTTP Client (Fetch wrapper, JWT Authorization, URL dinamis)
+│   ├── api.js                # Core HTTP Client (Fetch wrapper, tokenService JWT Authorization, URL dinamis)
 │   ├── index.js              # Re-export entrypoint modul lib
 │   ├── assets/               # Aset statis & logo favicon
 │   ├── components/           # Presentation Layer (Komponen UI Reusable)
-│   │   ├── Badge.svelte      # Komponen pill status
-│   │   ├── Button.svelte     # Komponen tombol interaktif
+│   │   ├── Badge.svelte      # Komponen pill status (success, danger, warning, amber, info, primary, neutral)
+│   │   ├── Button.svelte     # Komponen tombol interaktif (#btn-submit support)
 │   │   ├── Card.svelte       # Kontainer kartu serbaguna
 │   │   ├── EmptyState.svelte # Tampilan kondisi data kosong
-│   │   ├── Input.svelte      # Input field aksesibel dengan label & error
-│   │   ├── Modal.svelte      # Dialog konfirmasi aksi & form
+│   │   ├── Input.svelte      # Input field aksesibel dengan label, prefix, dan password toggle
+│   │   ├── Modal.svelte      # Dialog konfirmasi aksi & form dengan API prop terstandarisasi
 │   │   ├── PageHeader.svelte # Header judul halaman konsisten
 │   │   ├── Pagination.svelte # Kontrol paginasi data
-│   │   ├── Select.svelte     # Dropdown select kustom
+│   │   ├── Select.svelte     # Dropdown select kustom aksesibel
 │   │   ├── Skeleton.svelte   # Animasi loading placeholder
 │   │   ├── StatCard.svelte   # Kartu metrik statistik
 │   │   ├── Table.svelte      # Wrapper tabel data responsif
 │   │   └── Toast.svelte      # Notifikasi feedback global
-│   ├── constants/            # Application Constants & Enums
-│   │   └── index.js          # Rute, role, tipe transaksi, status iuran
-│   ├── services/             # Business Logic & Service Layer
+│   ├── constants/            # Application Constants & Enums (Bebas magic string)
+│   │   └── index.js          # Rute, role, tipe transaksi, status iuran, badge/modal variants
+│   ├── services/             # Business Logic & Service Layer (RBAC Enforcement)
 │   │   ├── authService.js    # Layanan autentikasi login & registrasi
-│   │   ├── categoryService.js# Layanan CRUD kategori pos kas
-│   │   ├── duesService.js    # Layanan tagihan iuran & penunggak
-│   │   ├── memberService.js  # Layanan manajemen data anggota
-│   │   └── transactionService.js # Layanan transaksi & ringkasan saldo
+│   │   ├── categoryService.js# Layanan CRUD kategori pos kas (assertBendahara)
+│   │   ├── duesService.js    # Layanan tagihan iuran & penunggak (assertBendahara)
+│   │   ├── guardService.js   # Layanan otorisasi & validasi peran independen UI
+│   │   ├── guardService.test.js # Unit test otorisasi & rule routing
+│   │   ├── memberService.js  # Layanan manajemen data anggota (assertBendahara)
+│   │   ├── tokenService.js   # Layanan manajemen token & sinkronisasi Cookie/Storage
+│   │   └── transactionService.js # Layanan transaksi & ringkasan saldo (assertBendahara)
 │   ├── stores/               # State Management Layer (Reactive Svelte Stores)
-│   │   ├── auth.js           # Pengelolaan sesi JWT & user profile
+│   │   ├── auth.js           # Pengelolaan sesi JWT & user profile reaktif
 │   │   └── toast.js          # Antrean notifikasi pop-up
 │   └── utils/                # Pure Helper Utilities & Sanitasi
+│       ├── cookies.js        # Utilitas manipulasi cookie (SameSite, Secure, Path)
 │       ├── errorHandler.js   # Normalisasi error backend ke pesan ramah pengguna
 │       ├── format.js         # Pemformatan mata uang IDR & tanggal Indonesia
 │       ├── format.test.js    # Unit test utilitas format
@@ -62,7 +67,8 @@ src/
 │       └── validators.test.js# Unit test validasi input
 └── routes/                   # Routing Layer (Halaman UI SvelteKit)
     ├── +layout.js            # Konfigurasi SPA mode (ssr = false, prerender = auto)
-    ├── +layout.svelte        # Shell layout utama (Sidebar, Header, Main, Footer)
+    ├── +layout.server.js     # Server-side layout loader menyalurkan locals otentikasi
+    ├── +layout.svelte        # Shell layout utama (Sidebar, Header, Main, Footer, Route Guard)
     ├── +page.svelte          # Dashboard & Ringkasan Kas
     ├── layout.css            # Styling global Tailwind CSS
     ├── anggota/              # Kelola Anggota Kelas
@@ -85,17 +91,25 @@ src/
    - Komponen UI di `routes/` hanya bertugas menampilkan tampilan (*view*), menangkap aksi pengguna, dan memanggil fungsi service.
    - Seluruh logika bisnis, HTTP request, transformasi data, dan query URL diisolasi ke dalam layer `src/lib/services/`.
 
-2. **Validasi Input & Keamanan Dasar**:
+2. **Otorisasi Berbasis Peran Independen dari UI (RBAC)**:
+   - Validasi peran tidak hanya mengandalkan penyembunyian tombol di tampilan UI.
+   - Modul `guardService.js` menyediakan fungsi `assertRole()` dan `assertBendahara()` yang dieksekusi langsung pada Service Layer (`memberService`, `categoryService`, `duesService`, `transactionService`).
+   - SvelteKit `hooks.server.js` dan `+layout.server.js` memvalidasi keberadaan sesi melalui Cookie dan menambahkan header keamanan HTTP (`X-Frame-Options`, `X-Content-Type-Options`).
+
+3. **Manajemen Sesi Aman & Sinkronisasi Token**:
+   - `tokenService.js` dan `cookies.js` mengelola token JWT dengan atribut `SameSite=Lax`, `Path=/`, dan `Secure` pada koneksi HTTPS, memastikan token dapat diakses oleh guard server sekaligus sinkron dengan penyimpanan klien.
+
+4. **Validasi Input & Keamanan Dasar**:
    - Validasi input dilakukan di sisi klien (*client-side*) secara berlapis pada modul `src/lib/utils/validators.js` sebelum data dikirimkan ke server.
    - Fungsi `sanitizeInput()` membersihkan tag HTML berbahaya untuk mencegah serangan *Cross-Site Scripting* (XSS).
    - Seluruh request HTTP menyertakan token JWT pada header `Authorization: Bearer <token>`.
    - Sesi pengguna otomatis dibersihkan dan dialihkan saat token kedaluwarsa (HTTP 401).
 
-3. **Penanganan Error Terpusat (*Error Handling*)**:
+5. **Penanganan Error Terpusat (*Error Handling*)**:
    - Modul `errorHandler.js` menormalisasi kesalahan jaringan, timeout server, dan respon error JSON backend ke pesan Bahasa Indonesia yang ramah pengguna.
    - Setiap aksi gagal menampilkan notifikasi pop-up visual via komponen `Toast.svelte`.
 
-4. **Aksesibilitas & Standar Web (WCAG 2.1 AA & Axe-Core)**:
+6. **Aksesibilitas & Standar Web (WCAG 2.1 AA & Axe-Core)**:
    - Semua elemen memiliki teks yang terlihat sesuai standar *accessible name* (`label-content-name-mismatch`: 0 pelanggaran).
    - Seluruh konten berada di dalam landmark semantik (`<header>`, `<aside>`, `<main id="main-content">`, `<footer>`).
    - Rasio kontras teks memenuhi standar WCAG AA ($\ge$ 4.5:1).

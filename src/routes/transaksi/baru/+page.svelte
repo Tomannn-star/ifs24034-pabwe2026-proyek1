@@ -7,19 +7,17 @@
   import { extractErrorMessage } from "$lib/utils/errorHandler.js";
   import { goto } from "$app/navigation";
   import { toast } from "$lib/stores/toast.js";
+  import { ROUTES, TRANSACTION_TYPES } from "$lib/constants/index.js";
   import PageHeader from "$lib/components/PageHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
+  import Input from "$lib/components/Input.svelte";
+  import Select from "$lib/components/Select.svelte";
   import {
     PlusCircle,
     ArrowLeft,
     ArrowDownLeft,
-    ArrowUpRight,
-    Calendar,
-    Coins,
-    Tag,
-    User,
-    FileText
+    ArrowUpRight
   } from "lucide-svelte";
 
   function getTodayString() {
@@ -31,7 +29,7 @@
   }
 
   let tanggal = $state(getTodayString());
-  let jenis = $state("masuk");
+  let jenis = $state(TRANSACTION_TYPES.MASUK);
   let jumlah = $state("");
   let category_id = $state("");
   let member_id = $state("");
@@ -99,7 +97,7 @@
       return;
     }
 
-    const ketErr = validateKeterangan(keterangan, true);
+    const ketErr = validateKeterangan(keterangan, 3);
     if (ketErr) {
       errorMessage = ketErr;
       toast.error(errorMessage);
@@ -109,16 +107,16 @@
     isLoading = true;
     try {
       await transactionService.createTransaction({
-        tanggal,
         jenis,
-        jumlah: parseInt(jumlah, 10),
-        kategori_id: parseInt(category_id, 10),
-        member_id: member_id ? parseInt(member_id, 10) : null,
-        keterangan: keterangan.trim()
+        kategori_id: Number(category_id),
+        jumlah: Number(jumlah),
+        tanggal,
+        keterangan,
+        member_id: member_id ? Number(member_id) : null
       });
 
       toast.success("Transaksi kas berhasil disimpan");
-      goto("/transaksi");
+      goto(ROUTES.TRANSAKSI);
     } catch (err) {
       errorMessage = extractErrorMessage(err, "Gagal menyimpan transaksi");
       toast.error(errorMessage);
@@ -138,7 +136,7 @@
     description="Tambahkan catatan mutasi penerimaan atau pengeluaran kas kelas."
     icon={PlusCircle}
   >
-    <a href="/transaksi">
+    <a href={ROUTES.TRANSAKSI}>
       <Button variant="secondary" size="sm">
         <ArrowLeft class="w-4 h-4 mr-1.5" />
         <span>Kembali</span>
@@ -155,114 +153,93 @@
         </span>
         <div class="grid grid-cols-2 gap-3">
           <label
-            class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'masuk' ? 'bg-teal-50 border-teal-600 text-teal-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
+            class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === TRANSACTION_TYPES.MASUK ? 'bg-teal-50 border-teal-600 text-teal-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
           >
-            <input type="radio" name="jenis" value="masuk" bind:group={jenis} class="sr-only" />
-            <ArrowDownLeft class="w-4 h-4 {jenis === 'masuk' ? 'text-teal-700' : 'text-slate-600'}" />
+            <input type="radio" name="jenis" value={TRANSACTION_TYPES.MASUK} bind:group={jenis} class="sr-only" />
+            <ArrowDownLeft class="w-4 h-4 {jenis === TRANSACTION_TYPES.MASUK ? 'text-teal-700' : 'text-slate-600'}" />
             <span>Kas Masuk (Pemasukan)</span>
           </label>
 
           <label
-            class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === 'keluar' ? 'bg-rose-50 border-rose-500 text-rose-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
+            class="flex items-center justify-center gap-2.5 p-3.5 border rounded-xl cursor-pointer font-bold text-sm transition {jenis === TRANSACTION_TYPES.KELUAR ? 'bg-rose-50 border-rose-500 text-rose-800 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}"
           >
-            <input type="radio" name="jenis" value="keluar" bind:group={jenis} class="sr-only" />
-            <ArrowUpRight class="w-4 h-4 {jenis === 'keluar' ? 'text-rose-600' : 'text-slate-600'}" />
+            <input type="radio" name="jenis" value={TRANSACTION_TYPES.KELUAR} bind:group={jenis} class="sr-only" />
+            <ArrowUpRight class="w-4 h-4 {jenis === TRANSACTION_TYPES.KELUAR ? 'text-rose-600' : 'text-slate-600'}" />
             <span>Kas Keluar (Pengeluaran)</span>
           </label>
         </div>
       </div>
 
-      <!-- Tanggal & Jumlah -->
+      <!-- Tanggal & Jumlah menggunakan Input component -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="space-y-1.5">
-          <label for="tanggal" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            Tanggal Transaksi
-          </label>
-          <input
-            id="tanggal"
-            type="date"
-            bind:value={tanggal}
-            required
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-          />
-        </div>
+        <Input
+          id="tanggal"
+          name="tanggal"
+          type="date"
+          label="Tanggal Transaksi"
+          bind:value={tanggal}
+          required
+        />
 
-        <div class="space-y-1.5">
-          <label for="jumlah" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            Jumlah Uang (Rupiah Utuh)
-          </label>
-          <div class="relative">
-            <span class="absolute left-3.5 top-2.5 text-slate-600 text-sm font-semibold select-none">Rp</span>
-            <input
-              id="jumlah"
-              type="number"
-              bind:value={jumlah}
-              placeholder="Contoh: 50000"
-              min="1"
-              step="1"
-              required
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 font-bold tabular-nums transition"
-            />
-          </div>
-        </div>
+        <Input
+          id="jumlah"
+          name="jumlah"
+          type="number"
+          label="Jumlah Uang (Rupiah Utuh)"
+          bind:value={jumlah}
+          placeholder="Contoh: 50000"
+          prefix="Rp"
+          min="1"
+          step="1"
+          required
+        />
       </div>
 
-      <!-- Kategori & Anggota -->
+      <!-- Kategori & Anggota menggunakan Select component -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="space-y-1.5">
-          <label for="category" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            Pos Kategori ({jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran'})
-          </label>
-          <select
-            id="category"
-            bind:value={category_id}
-            required
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-          >
-            {#if filteredCategories.length === 0}
-              <option value="">Tidak ada kategori {jenis}</option>
-            {:else}
-              {#each filteredCategories as cat}
-                <option value={cat.id}>{cat.nama}</option>
-              {/each}
-            {/if}
-          </select>
-        </div>
-
-        <div class="space-y-1.5">
-          <label for="member" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            Anggota Terkait (Opsional)
-          </label>
-          <select
-            id="member"
-            bind:value={member_id}
-            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-          >
-            <option value="">-- Tanpa Anggota Khusus --</option>
-            {#each members as m}
-              <option value={m.id}>{m.nama}</option>
+        <Select
+          id="category"
+          name="category"
+          label="Pos Kategori ({jenis === TRANSACTION_TYPES.MASUK ? 'Pemasukan' : 'Pengeluaran'})"
+          bind:value={category_id}
+          required
+        >
+          {#if filteredCategories.length === 0}
+            <option value="" disabled>Belum ada kategori untuk jenis ini</option>
+          {:else}
+            {#each filteredCategories as cat}
+              <option value={String(cat.id)}>{cat.nama}</option>
             {/each}
-          </select>
-        </div>
+          {/if}
+        </Select>
+
+        <Select
+          id="member"
+          name="member"
+          label="Terkait Anggota (Opsional)"
+          bind:value={member_id}
+        >
+          <option value="">-- Tidak Terkait Anggota --</option>
+          {#each members as m}
+            <option value={String(m.id)}>{m.nama}</option>
+          {/each}
+        </Select>
       </div>
 
-      <!-- Keterangan Transaksi -->
-      <div class="space-y-1.5">
-        <label for="keterangan" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-          Keterangan Transaksi
-        </label>
-        <textarea
-          id="keterangan"
-          bind:value={keterangan}
-          rows="3"
-          placeholder="Tuliskan catatan transaksi (contoh: Belanja spidol dan penghapus whiteboard, donasi lomba, dll)"
-          class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
-        ></textarea>
-      </div>
+      <!-- Keterangan Transaksi menggunakan Input component -->
+      <Input
+        id="keterangan"
+        name="keterangan"
+        type="text"
+        label="Keterangan / Catatan Transaksi"
+        bind:value={keterangan}
+        placeholder="Contoh: Iuran kas mingguan atau Pembelian spidol & penghapus"
+        required
+      />
 
-      <!-- Actions -->
-      <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
-        <a href="/transaksi">
+      <!-- Tombol Simpan -->
+      <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+        <a href={ROUTES.TRANSAKSI}>
           <Button variant="secondary" size="md">
             Batal
           </Button>
@@ -272,8 +249,9 @@
           variant="primary"
           size="md"
           loading={isLoading}
+          disabled={isLoading}
         >
-          <span>Simpan Transaksi Kas</span>
+          Simpan Transaksi Kas
         </Button>
       </div>
     </form>

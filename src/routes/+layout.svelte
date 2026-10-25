@@ -3,6 +3,8 @@
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/stores/auth.js";
+  import { checkRouteAccess } from "$lib/services/guardService.js";
+  import { ROUTES, USER_ROLES, BADGE_VARIANTS } from "$lib/constants/index.js";
   import { browser } from "$app/environment";
   import Toast from "$lib/components/Toast.svelte";
   import Badge from "$lib/components/Badge.svelte";
@@ -34,23 +36,14 @@
     return unsub;
   });
 
-  // Client-side route guard untuk halaman terproteksi & publik
+  // Client-side route guard terpusat menggunakan guardService
   $effect(() => {
     if (!browser) return;
 
     const path = page.url.pathname;
-    const isPublicPage = path.startsWith("/auth/");
-
-    if (!token && !isPublicPage) {
-      goto("/auth/login");
-    } else if (token && isPublicPage) {
-      goto("/");
-    } else if (token && currentUser?.role === "anggota") {
-      const bendaharaOnly = ["/anggota", "/penunggak", "/kategori", "/transaksi/baru"];
-      const isRestricted = bendaharaOnly.some((prefix) => path.startsWith(prefix));
-      if (isRestricted) {
-        goto("/");
-      }
+    const access = checkRouteAccess(path);
+    if (!access.allowed && access.redirectTo) {
+      goto(access.redirectTo);
     }
   });
 
@@ -184,10 +177,10 @@
                 {currentUser?.nama || currentUser?.username}
               </p>
               <div class="mt-0.5">
-                {#if currentUser?.role === "bendahara"}
-                  <Badge variant="amber" size="sm">Bendahara</Badge>
+                {#if currentUser?.role === USER_ROLES.BENDAHARA}
+                  <Badge variant={BADGE_VARIANTS.AMBER} size="sm">Bendahara</Badge>
                 {:else}
-                  <Badge variant="primary" size="sm">Anggota</Badge>
+                  <Badge variant={BADGE_VARIANTS.PRIMARY} size="sm">Anggota</Badge>
                 {/if}
               </div>
             </div>
