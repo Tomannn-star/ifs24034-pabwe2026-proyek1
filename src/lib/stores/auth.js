@@ -5,10 +5,27 @@
  */
 
 import { writable } from "svelte/store";
-import { browser } from "$app/environment";
-import { goto } from "$app/navigation";
-import { tokenService } from "$lib/services/tokenService.js";
-import { ROUTES } from "$lib/constants/index.js";
+import { tokenService } from "../services/tokenService.js";
+import { ROUTES } from "../constants/index.js";
+
+const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+
+function navigateToLogin() {
+  if (!isBrowser) return;
+  try {
+    import("$app/navigation").then(({ goto }) => {
+      goto(ROUTES.LOGIN);
+    }).catch(() => {
+      if (window.location && window.location.pathname !== ROUTES.LOGIN) {
+        window.location.href = ROUTES.LOGIN;
+      }
+    });
+  } catch {
+    if (window.location && window.location.pathname !== ROUTES.LOGIN) {
+      window.location.href = ROUTES.LOGIN;
+    }
+  }
+}
 
 function createAuthStore() {
   const initialToken = tokenService.getToken();
@@ -40,8 +57,8 @@ function createAuthStore() {
     logout(redirect = true) {
       tokenService.clearSession();
       set({ token: null, user: null, isLoaded: true });
-      if (redirect && browser) {
-        goto(ROUTES.LOGIN);
+      if (redirect) {
+        navigateToLogin();
       }
     },
 

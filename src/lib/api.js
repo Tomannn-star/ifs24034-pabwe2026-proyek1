@@ -1,7 +1,8 @@
 import { auth } from "./stores/auth.js";
 import { tokenService } from "./services/tokenService.js";
-import { browser } from "$app/environment";
-import { ROUTES } from "$lib/constants/index.js";
+import { ROUTES } from "./constants/index.js";
+
+const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
 
 // Ambil URL API dari environment variable (PUBLIC_API_URL atau VITE_API_URL)
 const envApiUrl = import.meta.env.PUBLIC_API_URL || 
@@ -18,7 +19,7 @@ export function getBaseUrl() {
   if (envApiUrl && envApiUrl.trim() !== "") {
     return envApiUrl.replace(/\/$/, "");
   }
-  if (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")) {
+  if (typeof window !== "undefined" && window.location?.hostname?.includes("vercel.app")) {
     return "https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api";
   }
   return "http://localhost:5001/api";
@@ -63,7 +64,7 @@ export async function apiRequest(endpoint, options = {}) {
 
   // Jika token tidak valid / kedaluwarsa, otomatis logout ke login page
   if (response.status === 401) {
-    if (browser && !window.location.pathname.startsWith("/auth/") && window.location.pathname !== "/login") {
+    if (isBrowser && window.location && !window.location.pathname.startsWith("/auth/") && window.location.pathname !== "/login") {
       auth.logout(true);
     }
     const errData = await response.json().catch(() => ({}));

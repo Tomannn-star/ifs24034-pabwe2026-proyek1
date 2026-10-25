@@ -69,3 +69,4 @@ describe("Browser Cookie Utilities", () => {
     expect(() => removeCookie("any")).not.toThrow();
   });
 });
+

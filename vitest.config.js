@@ -7,7 +7,9 @@ export default defineConfig({
   resolve: {
     alias: {
       $lib: path.resolve(currentDir, './src/lib'),
-      '$lib/*': path.resolve(currentDir, './src/lib/*')
+      '$lib/*': path.resolve(currentDir, './src/lib/*'),
+      '$app/environment': path.resolve(currentDir, './src/lib/__mocks__/app-environment.js'),
+      '$app/navigation': path.resolve(currentDir, './src/lib/__mocks__/app-navigation.js')
     }
   },
   test: {
@@ -26,9 +28,9 @@ export default defineConfig({
         '**/*.spec.js',
         'postbuild.js',
         'vite.config.js',
-        'vitest.config.js'
+        'vitest.config.js',
+        'src/lib/__mocks__/**'
       ]
     }
   }
 });
-

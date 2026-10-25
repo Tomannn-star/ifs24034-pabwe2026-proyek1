@@ -43,3 +43,4 @@ describe("Centralized Error Handler Utilities", () => {
     expect(extractErrorMessage(unknownObj, "Terjadi gangguan server")).toBe("Terjadi gangguan server");
   });
 });
+
