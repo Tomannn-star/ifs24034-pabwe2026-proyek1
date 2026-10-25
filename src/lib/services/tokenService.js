@@ -9,7 +9,7 @@ import { APP_CONFIG } from "../constants/index.js";
 import { getCookie, setCookie, removeCookie } from "../utils/cookies.js";
 
 function isClientEnvironment() {
-  return typeof globalThis.window !== "undefined" && typeof globalThis.document !== "undefined";
+  return globalThis.window !== undefined && globalThis.document !== undefined;
 }
 
 export class TokenService {
@@ -28,8 +28,8 @@ export class TokenService {
   init() {
     if (isClientEnvironment()) {
       let token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
-      if (!token && typeof localStorage !== "undefined") {
-        token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      if (!token && globalThis.localStorage !== undefined) {
+        token = globalThis.localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
       }
 
       if (token && this.isTokenExpired(token)) {
@@ -39,8 +39,8 @@ export class TokenService {
       this.#token = token || null;
 
       let rawUser = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
-      if (!rawUser && typeof localStorage !== "undefined") {
-        rawUser = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
+      if (!rawUser && globalThis.localStorage !== undefined) {
+        rawUser = globalThis.localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
       }
       if (rawUser) {
         try {
@@ -98,8 +98,8 @@ export class TokenService {
     let token = this.#token;
     if (!token && isClientEnvironment()) {
       token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
-      if (!token && typeof localStorage !== "undefined") {
-        token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      if (!token && globalThis.localStorage !== undefined) {
+        token = globalThis.localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
       }
     }
     if (token && this.isTokenExpired(token)) {
@@ -122,8 +122,8 @@ export class TokenService {
     if (this.#user) return this.#user;
     if (isClientEnvironment()) {
       let raw = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
-      if (!raw && typeof localStorage !== "undefined") {
-        raw = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
+      if (!raw && globalThis.localStorage !== undefined) {
+        raw = globalThis.localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
       }
       if (raw) {
         try {
@@ -170,9 +170,9 @@ export class TokenService {
       setCookie(APP_CONFIG.STORAGE_KEYS.USER, serializedUser, 7);
 
       // Sinkronkan ke localStorage sebagai fallback
-      if (typeof localStorage !== "undefined") {
-        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TOKEN, token);
-        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
+      if (globalThis.localStorage !== undefined) {
+        globalThis.localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TOKEN, token);
+        globalThis.localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
       }
     }
   }
@@ -186,8 +186,8 @@ export class TokenService {
     if (isClientEnvironment()) {
       const serializedUser = JSON.stringify(user);
       setCookie(APP_CONFIG.STORAGE_KEYS.USER, serializedUser, 7);
-      if (typeof localStorage !== "undefined") {
-        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
+      if (globalThis.localStorage !== undefined) {
+        globalThis.localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER, serializedUser);
       }
     }
   }
@@ -202,9 +202,9 @@ export class TokenService {
     if (isClientEnvironment()) {
       removeCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
       removeCookie(APP_CONFIG.STORAGE_KEYS.USER);
-      if (typeof localStorage !== "undefined") {
-        localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
-        localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER);
+      if (globalThis.localStorage !== undefined) {
+        globalThis.localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+        globalThis.localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER);
       }
     }
   }

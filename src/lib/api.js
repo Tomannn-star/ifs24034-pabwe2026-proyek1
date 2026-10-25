@@ -16,10 +16,10 @@ const envApiUrl = import.meta.env.PUBLIC_API_URL ||
  * @returns {string}
  */
 export function getBaseUrl(overrideUrl = envApiUrl) {
-  if (overrideUrl && overrideUrl.trim() !== "") {
+  if (overrideUrl?.trim()) {
     return overrideUrl.replace(/\/$/, "");
   }
-  if (typeof globalThis.window !== "undefined" && globalThis.window.location?.hostname?.includes("vercel.app")) {
+  if (globalThis.window?.location?.hostname?.includes("vercel.app")) {
     return "https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api";
   }
   return "http://localhost:5001/api";
@@ -40,7 +40,10 @@ export async function apiRequest(endpoint, options = {}) {
 
   const token = tokenService.getToken();
 
-  const headers = Object.assign({ "Content-Type": "application/json" }, options.headers);
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers
+  };
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -62,8 +65,8 @@ export async function apiRequest(endpoint, options = {}) {
 
   // Jika token tidak valid / kedaluwarsa, otomatis logout ke login page
   if (response.status === 401) {
-    const isBrowser = typeof globalThis.window !== "undefined" && typeof globalThis.document !== "undefined";
-    if (isBrowser && globalThis.window.location && !globalThis.window.location.pathname.startsWith("/auth/") && globalThis.window.location.pathname !== "/login") {
+    const pathname = globalThis.window?.location?.pathname;
+    if (pathname && !pathname.startsWith("/auth/") && pathname !== "/login") {
       auth.logout(true);
     }
     const errData = await response.json().catch(() => ({}));

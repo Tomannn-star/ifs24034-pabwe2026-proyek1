@@ -11,9 +11,9 @@
  * @param {number} [days=7] - Durasi masa berlaku dalam hari
  */
 export function setCookie(name, value, days = 7) {
-  if (typeof document === "undefined") return;
+  if (globalThis.document === undefined) return;
   const maxAge = days * 24 * 60 * 60;
-  const secure = typeof globalThis.window !== "undefined" && globalThis.window.location?.protocol === "https:" ? "; Secure" : "";
+  const secure = globalThis.window?.location?.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
 
@@ -23,7 +23,7 @@ export function setCookie(name, value, days = 7) {
  * @returns {string|null} Nilai cookie atau null jika tidak ditemukan
  */
 export function getCookie(name) {
-  if (typeof document === "undefined") return null;
+  if (globalThis.document === undefined) return null;
   const target = `${encodeURIComponent(name)}=`;
   const parts = document.cookie.split(";");
   for (const rawPart of parts) {
@@ -40,6 +40,6 @@ export function getCookie(name) {
  * @param {string} name - Nama cookie yang akan dihapus
  */
 export function removeCookie(name) {
-  if (typeof document === "undefined") return;
+  if (globalThis.document === undefined) return;
   document.cookie = `${encodeURIComponent(name)}=; path=/; max-age=0; SameSite=Lax`;
 }
