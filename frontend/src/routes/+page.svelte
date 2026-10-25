@@ -238,10 +238,10 @@
         <!-- HIJAU: Semua Lunas -->
         <div class="p-5 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-emerald-500/10 border border-emerald-500/20 text-emerald-950 rounded-2xl flex items-center gap-4 shadow-2xs">
           <div class="w-11 h-11 bg-emerald-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-            <CheckCircle2 class="w-6 h-6" />
+            <CheckCircle2 class="w-6 h-6" aria-hidden="true" />
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-base text-emerald-950">Semua iuran kas sudah lunas</h3>
+            <h2 class="font-bold text-base text-emerald-950">Semua iuran kas sudah lunas</h2>
             <p class="text-xs text-emerald-700 mt-0.5">
               Luar biasa! Kamu tidak memiliki tunggakan iuran saat ini. Terima kasih telah tertib berkontribusi untuk kas kelas!
             </p>
@@ -252,12 +252,12 @@
         <div class="p-5 bg-gradient-to-r from-rose-500/15 via-rose-500/5 to-orange-500/10 border border-rose-500/30 text-rose-950 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
           <div class="flex items-center gap-4 min-w-0">
             <div class="w-11 h-11 bg-rose-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs animate-pulse">
-              <AlertTriangle class="w-6 h-6" />
+              <AlertTriangle class="w-6 h-6" aria-hidden="true" />
             </div>
             <div class="min-w-0">
-              <h3 class="font-bold text-base text-rose-950">
+              <h2 class="font-bold text-base text-rose-950">
                 Kamu punya {remindersData.jumlah_belum_bayar} iuran belum dibayar &mdash; total <span class="tabular-nums font-extrabold">{formatRupiah(remindersData.total_tunggakan)}</span>
-              </h3>
+              </h2>
               <p class="text-xs text-rose-700 mt-0.5">
                 Peringatan: <strong>{remindersData.jumlah_terlambat} tagihan telah melewati tanggal jatuh tempo</strong>. Harap segera melunasi iuran kepada bendahara kelas.
               </p>
@@ -266,7 +266,7 @@
           <a href="/iuran" class="shrink-0">
             <Button variant="danger" size="sm">
               <span>Lihat Iuran Saya</span>
-              <ChevronRight class="w-4 h-4 ml-1" />
+              <ChevronRight class="w-4 h-4 ml-1" aria-hidden="true" />
             </Button>
           </a>
         </div>
@@ -275,12 +275,12 @@
         <div class="p-5 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-yellow-500/10 border border-amber-500/30 text-amber-950 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
           <div class="flex items-center gap-4 min-w-0">
             <div class="w-11 h-11 bg-amber-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-              <Clock class="w-6 h-6" />
+              <Clock class="w-6 h-6" aria-hidden="true" />
             </div>
             <div class="min-w-0">
-              <h3 class="font-bold text-base text-amber-950">
+              <h2 class="font-bold text-base text-amber-950">
                 Kamu punya {remindersData.jumlah_belum_bayar} iuran belum dibayar &mdash; total <span class="tabular-nums font-extrabold">{formatRupiah(remindersData.total_tunggakan)}</span>
-              </h3>
+              </h2>
               <p class="text-xs text-amber-800 mt-0.5">
                 Jatuh tempo: <strong>{formatTanggal(remindersData.iuran[0]?.jatuh_tempo)}</strong> (Sisa waktu: <strong>{remindersData.iuran[0]?.sisa_hari} hari lagi</strong>).
               </p>
@@ -289,7 +289,7 @@
           <a href="/iuran" class="shrink-0">
             <Button variant="secondary" size="sm">
               <span>Lihat Iuran Saya</span>
-              <ChevronRight class="w-4 h-4 ml-1" />
+              <ChevronRight class="w-4 h-4 ml-1" aria-hidden="true" />
             </Button>
           </a>
         </div>
@@ -301,12 +301,12 @@
       <div class="p-5 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-rose-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
         <div class="flex items-center gap-4 min-w-0">
           <div class="w-11 h-11 bg-amber-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-            <Bell class="w-6 h-6" />
+            <Bell class="w-6 h-6" aria-hidden="true" />
           </div>
           <div class="min-w-0">
-            <h3 class="font-bold text-base text-amber-950">
+            <h2 class="font-bold text-base text-amber-950">
               Perhatian: {summaryData.total_penunggak} anggota kelas tercatat menunggak iuran kas
-            </h3>
+            </h2>
             <p class="text-xs text-amber-800 mt-0.5">
               Tagihan mereka telah melewati batas tanggal jatuh tempo. Pantau atau hubungi anggota terkait.
             </p>
@@ -315,7 +315,7 @@
         <a href="/penunggak" class="shrink-0">
           <Button variant="secondary" size="sm">
             <span>Daftar Penunggak</span>
-            <ChevronRight class="w-4 h-4 ml-1" />
+            <ChevronRight class="w-4 h-4 ml-1" aria-hidden="true" />
           </Button>
         </a>
       </div>

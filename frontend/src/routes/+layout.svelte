@@ -96,7 +96,7 @@
               <span class="font-bold text-lg text-slate-900 tracking-tight leading-none">KasPintar</span>
               <span class="w-2 h-2 rounded-full bg-emerald-500" title="Aktif"></span>
             </div>
-            <p class="text-[11px] font-medium text-slate-400 mt-1">Uang Kas Kelas</p>
+            <p class="text-[11px] font-medium text-slate-600 mt-1">Uang Kas Kelas</p>
           </div>
         </a>
       </div>
@@ -105,7 +105,7 @@
       <nav class="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
         <!-- Grup: Utama -->
         <div>
-          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-2">
             Menu Utama
           </p>
           <div class="space-y-1">
@@ -113,7 +113,7 @@
               href="/"
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
             >
-              <LayoutDashboard class="w-4 h-4 {page.url.pathname === '/' ? 'text-teal-700' : 'text-slate-400'}" />
+              <LayoutDashboard class="w-4 h-4 {page.url.pathname === '/' ? 'text-teal-700' : 'text-slate-500'}" aria-hidden="true" />
               <span>Dashboard</span>
             </a>
 
@@ -121,7 +121,7 @@
               href="/transaksi"
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname.startsWith('/transaksi') ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
             >
-              <Receipt class="w-4 h-4 {page.url.pathname.startsWith('/transaksi') ? 'text-teal-700' : 'text-slate-400'}" />
+              <Receipt class="w-4 h-4 {page.url.pathname.startsWith('/transaksi') ? 'text-teal-700' : 'text-slate-500'}" aria-hidden="true" />
               <span>Transaksi</span>
             </a>
 
@@ -129,7 +129,7 @@
               href="/iuran"
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/iuran' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
             >
-              <CalendarClock class="w-4 h-4 {page.url.pathname === '/iuran' ? 'text-teal-700' : 'text-slate-400'}" />
+              <CalendarClock class="w-4 h-4 {page.url.pathname === '/iuran' ? 'text-teal-700' : 'text-slate-500'}" aria-hidden="true" />
               <span>{currentUser?.role === 'bendahara' ? 'Kelola Iuran' : 'Iuran Saya'}</span>
             </a>
           </div>
@@ -138,7 +138,7 @@
         <!-- Grup: Administrasi (Khusus Bendahara) -->
         {#if currentUser?.role === "bendahara"}
           <div>
-            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-2">
               Administrasi
             </p>
             <div class="space-y-1">
@@ -146,7 +146,7 @@
                 href="/anggota"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/anggota' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
               >
-                <Users class="w-4 h-4 {page.url.pathname === '/anggota' ? 'text-teal-700' : 'text-slate-400'}" />
+                <Users class="w-4 h-4 {page.url.pathname === '/anggota' ? 'text-teal-700' : 'text-slate-500'}" aria-hidden="true" />
                 <span>Anggota</span>
               </a>
 
@@ -154,7 +154,7 @@
                 href="/penunggak"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/penunggak' ? 'bg-rose-50 text-rose-800 font-semibold shadow-2xs border border-rose-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
               >
-                <AlertTriangle class="w-4 h-4 {page.url.pathname === '/penunggak' ? 'text-rose-600' : 'text-slate-400'}" />
+                <AlertTriangle class="w-4 h-4 {page.url.pathname === '/penunggak' ? 'text-rose-600' : 'text-slate-500'}" aria-hidden="true" />
                 <span>Penunggak</span>
               </a>
 
@@ -162,7 +162,7 @@
                 href="/kategori"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 {page.url.pathname === '/kategori' ? 'bg-teal-50 text-teal-800 font-semibold shadow-2xs border border-teal-200/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}"
               >
-                <Tag class="w-4 h-4 {page.url.pathname === '/kategori' ? 'text-teal-700' : 'text-slate-400'}" />
+                <Tag class="w-4 h-4 {page.url.pathname === '/kategori' ? 'text-teal-700' : 'text-slate-500'}" aria-hidden="true" />
                 <span>Kategori</span>
               </a>
             </div>
@@ -222,12 +222,12 @@
         type="button"
         onclick={() => (isMobileDrawerOpen = !isMobileDrawerOpen)}
         class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-        aria-label="Buka Menu"
+        aria-label={isMobileDrawerOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
       >
         {#if isMobileDrawerOpen}
-          <X class="w-5 h-5" />
+          <X class="w-5 h-5" aria-hidden="true" />
         {:else}
-          <Menu class="w-5 h-5" />
+          <Menu class="w-5 h-5" aria-hidden="true" />
         {/if}
       </button>
     </div>
@@ -240,6 +240,7 @@
         onkeydown={(e) => e.key === 'Escape' && (isMobileDrawerOpen = false)}
         role="button"
         tabindex="0"
+        aria-label="Tutup menu navigasi"
       ></div>
 
       <div class="lg:hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white z-50 shadow-2xl flex flex-col justify-between animate-in slide-in-from-left duration-200">

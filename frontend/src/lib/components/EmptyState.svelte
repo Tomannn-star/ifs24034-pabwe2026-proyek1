@@ -23,12 +23,12 @@
     </div>
   {/if}
 
-  <h3 class="font-extrabold text-slate-900 text-base tracking-tight">
+  <h2 class="font-extrabold text-slate-900 text-base tracking-tight">
     {title}
-  </h3>
+  </h2>
 
   {#if description}
-    <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
       {description}
     </p>
   {/if}

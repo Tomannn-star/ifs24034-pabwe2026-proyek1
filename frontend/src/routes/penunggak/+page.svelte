@@ -146,11 +146,11 @@
 
                 <!-- Rincian Periode yang Menunggak -->
                 <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span class="text-xs text-slate-400 font-medium">Periode tertunggak:</span>
+                  <span class="text-xs text-slate-600 font-medium">Periode tertunggak:</span>
                   {#each p.rincian as r}
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200/80 rounded-md text-xs font-bold">
                       <span>{formatPeriode(r.periode)}</span>
-                      <span class="text-[10px] text-rose-500 font-normal">({r.hari_terlambat} hari lewat)</span>
+                      <span class="text-[10px] text-rose-600 font-normal">({r.hari_terlambat} hari lewat)</span>
                     </span>
                   {/each}
                 </div>
@@ -159,7 +159,7 @@
               <!-- Total Tunggakan Anggota & Aksi -->
               <div class="flex items-center justify-between md:justify-end gap-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                 <div class="text-left md:text-right">
-                  <div class="text-xs font-semibold text-slate-400">Total ({p.jumlah_tunggakan} bulan)</div>
+                  <div class="text-xs font-semibold text-slate-600">Total ({p.jumlah_tunggakan} bulan)</div>
                   <div class="text-lg font-extrabold text-rose-600 tabular-nums">{formatRupiah(p.total_tunggakan)}</div>
                 </div>
 

@@ -185,22 +185,23 @@
       <!-- Search Input dengan Icon -->
       <div class="relative flex-1">
         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-          <Search class="w-4 h-4" />
+          <Search class="w-4 h-4" aria-hidden="true" />
         </div>
         <input
           type="text"
           bind:value={searchKeyword}
           oninput={handleSearchInput}
           placeholder="Cari keterangan, pos kas, atau nama anggota..."
+          aria-label="Cari transaksi berdasarkan keterangan atau nama"
           class="w-full pl-10 pr-9 py-2.5 bg-slate-50/80 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
         />
         {#if searchKeyword}
           <button
             onclick={() => { searchKeyword = ''; handleFilterInstant(); }}
-            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700 cursor-pointer"
             aria-label="Bersihkan pencarian"
           >
-            <X class="w-4 h-4" />
+            <X class="w-4 h-4" aria-hidden="true" />
           </button>
         {/if}
       </div>
@@ -209,22 +210,25 @@
       <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200/60 text-xs font-semibold self-start sm:self-auto shrink-0">
         <button
           onclick={() => selectJenisPill("")}
+          aria-label="Filter semua jenis transaksi"
           class="px-3 py-1.5 rounded-lg transition cursor-pointer {filterJenis === '' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'}"
         >
           Semua Jenis
         </button>
         <button
           onclick={() => selectJenisPill("masuk")}
+          aria-label="Filter kas masuk saja"
           class="px-3 py-1.5 rounded-lg flex items-center gap-1 transition cursor-pointer {filterJenis === 'masuk' ? 'bg-teal-700 text-white shadow-2xs' : 'text-slate-600 hover:text-teal-800'}"
         >
-          <ArrowDownLeft class="w-3.5 h-3.5" />
+          <ArrowDownLeft class="w-3.5 h-3.5" aria-hidden="true" />
           <span>Kas Masuk</span>
         </button>
         <button
           onclick={() => selectJenisPill("keluar")}
+          aria-label="Filter kas keluar saja"
           class="px-3 py-1.5 rounded-lg flex items-center gap-1 transition cursor-pointer {filterJenis === 'keluar' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-rose-700'}"
         >
-          <ArrowUpRight class="w-3.5 h-3.5" />
+          <ArrowUpRight class="w-3.5 h-3.5" aria-hidden="true" />
           <span>Kas Keluar</span>
         </button>
       </div>
@@ -236,19 +240,21 @@
           bind:value={filterDari}
           onchange={handleFilterInstant}
           title="Tanggal Mulai"
+          aria-label="Tanggal Mulai"
           class="px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 text-xs"
         />
-        <span class="text-slate-400">s/d</span>
+        <span class="text-slate-600">s/d</span>
         <input
           type="date"
           bind:value={filterSampai}
           onchange={handleFilterInstant}
           title="Tanggal Selesai"
+          aria-label="Tanggal Selesai"
           class="px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 text-xs"
         />
         {#if isAnyFilterActive}
-          <Button variant="ghost" size="sm" onclick={handleResetFilter} title="Bersihkan filter">
-            <RotateCcw class="w-3.5 h-3.5 mr-1" />
+          <Button variant="ghost" size="sm" onclick={handleResetFilter} title="Bersihkan filter" aria-label="Bersihkan semua saringan">
+            <RotateCcw class="w-3.5 h-3.5 mr-1" aria-hidden="true" />
             <span>Reset</span>
           </Button>
         {/if}
@@ -257,7 +263,7 @@
 
     <!-- Baris 2: PILIHAN KATEGORI INSTAN -->
     <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
-      <span class="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1.5">Pos Kategori:</span>
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-600 mr-1.5">Pos Kategori:</span>
 
       <button
         type="button"

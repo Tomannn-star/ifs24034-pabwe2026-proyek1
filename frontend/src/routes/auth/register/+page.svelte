@@ -79,6 +79,7 @@
 
 <svelte:head>
   <title>Daftar Akun Baru - KasPintar</title>
+  <meta name="description" content="Pendaftaran akun pengguna baru sistem kas kelas KasPintar." />
 </svelte:head>
 
 <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -101,11 +102,11 @@
 
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 rounded-2xl bg-white text-teal-900 flex items-center justify-center shadow-lg">
-            <Wallet class="w-6 h-6 text-teal-800" />
+            <Wallet class="w-6 h-6 text-teal-800" aria-hidden="true" />
           </div>
           <div>
             <h1 class="text-2xl font-extrabold tracking-tight text-white leading-none">KasPintar</h1>
-            <p class="text-xs text-teal-200/90 font-medium mt-1">Registrasi Akun Anggota Baru</p>
+            <p class="text-xs text-teal-100 font-medium mt-1">Registrasi Akun Anggota Baru</p>
           </div>
         </div>
       </div>
@@ -114,11 +115,11 @@
       <div class="relative z-10 my-8 space-y-4">
         <div class="flex items-start gap-3">
           <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
-            <CheckCircle2 class="w-3.5 h-3.5 text-teal-300" />
+            <CheckCircle2 class="w-3.5 h-3.5 text-teal-300" aria-hidden="true" />
           </div>
           <div>
-            <h3 class="text-sm font-bold text-white">Transparan & Terbuka</h3>
-            <p class="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+            <h2 class="text-sm font-bold text-white">Transparan & Terbuka</h2>
+            <p class="text-xs text-teal-50 mt-0.5 leading-relaxed">
               Pantau laporan kas masuk dan saldo kelas kapan saja langsung dari ponsel Anda.
             </p>
           </div>
@@ -126,11 +127,11 @@
 
         <div class="flex items-start gap-3">
           <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
-            <Coins class="w-3.5 h-3.5 text-teal-300" />
+            <Coins class="w-3.5 h-3.5 text-teal-300" aria-hidden="true" />
           </div>
           <div>
-            <h3 class="text-sm font-bold text-white">Riwayat Iuran Pribadi</h3>
-            <p class="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+            <h2 class="text-sm font-bold text-white">Riwayat Iuran Pribadi</h2>
+            <p class="text-xs text-teal-50 mt-0.5 leading-relaxed">
               Ketahui tanggal jatuh tempo dan status pembayaran iuran kas bulanan Anda.
             </p>
           </div>
@@ -138,11 +139,11 @@
 
         <div class="flex items-start gap-3">
           <div class="w-6 h-6 rounded-lg bg-teal-700/80 text-teal-200 flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
-            <ShieldCheck class="w-3.5 h-3.5 text-teal-300" />
+            <ShieldCheck class="w-3.5 h-3.5 text-teal-300" aria-hidden="true" />
           </div>
           <div>
-            <h3 class="text-sm font-bold text-white">Keamanan Akun Terjamin</h3>
-            <p class="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+            <h2 class="text-sm font-bold text-white">Keamanan Akun Terjamin</h2>
+            <p class="text-xs text-teal-50 mt-0.5 leading-relaxed">
               Sandi terenkripsi dengan aman dan terautentikasi melalui JSON Web Token.
             </p>
           </div>
@@ -150,7 +151,7 @@
       </div>
 
       <!-- Footer Brand Info -->
-      <div class="relative z-10 pt-4 border-t border-teal-700/40 text-[11px] text-teal-200/70">
+      <div class="relative z-10 pt-4 border-t border-teal-700/40 text-[11px] text-teal-100">
         Praktikum PABWE &bull; Halaman Publik &bull; SvelteKit SPA
       </div>
     </div>
@@ -162,14 +163,14 @@
       <div class="max-w-md w-full mx-auto">
         <div class="mb-5">
           <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Daftar Akun Baru</h2>
-          <p class="text-sm text-slate-500 mt-1">
+          <p class="text-sm text-slate-600 mt-1">
             Buat akun baru untuk mulai mengakses sistem kas kelas KasPintar.
           </p>
         </div>
 
         {#if errorMessage}
           <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-700 text-xs sm:text-sm animate-in fade-in duration-150">
-            <AlertCircle class="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+            <AlertCircle class="w-5 h-5 shrink-0 text-rose-600 mt-0.5" aria-hidden="true" />
             <div class="leading-snug">
               <span class="font-bold">Gagal Mendaftar:</span> {errorMessage}
             </div>
@@ -190,6 +191,7 @@
                 bind:value={nama}
                 placeholder="Contoh: Toman Sihombing"
                 required
+                aria-label="Nama Lengkap"
                 class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
               />
               <input
@@ -198,7 +200,7 @@
                 name="nama"
                 bind:value={nama}
               />
-              <User class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <User class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             </div>
           </div>
 
@@ -215,6 +217,7 @@
               placeholder="Contoh: toman2026 (min. 3 karakter)"
               required
               autocomplete="username"
+              aria-label="Username"
               class="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
             />
           </div>
@@ -233,19 +236,20 @@
                 placeholder="Minimal 6 karakter"
                 required
                 autocomplete="new-password"
+                aria-label="Password"
                 class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
               />
               <button
                 type="button"
                 onclick={() => (showPassword = !showPassword)}
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 p-1 rounded-lg transition"
                 title={showPassword ? "Sembunyikan password" : "Lihat password"}
                 aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
               >
                 {#if showPassword}
-                  <EyeOff class="w-4 h-4" />
+                  <EyeOff class="w-4 h-4" aria-hidden="true" />
                 {:else}
-                  <Eye class="w-4 h-4" />
+                  <Eye class="w-4 h-4" aria-hidden="true" />
                 {/if}
               </button>
             </div>
@@ -254,7 +258,7 @@
           <!-- Input Kontak (Opsional) -->
           <div class="space-y-1">
             <label for="kontak" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              No. WhatsApp / HP <span class="text-slate-400 font-normal normal-case">(Opsional)</span>
+              No. WhatsApp / HP <span class="text-slate-600 font-normal normal-case">(Opsional)</span>
             </label>
             <div class="relative">
               <input
@@ -263,9 +267,10 @@
                 type="text"
                 bind:value={kontak}
                 placeholder="Contoh: 081234567890"
+                aria-label="No WhatsApp atau HP"
                 class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700/20 focus:border-teal-700 transition duration-150"
               />
-              <Phone class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Phone class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             </div>
           </div>
 
@@ -276,11 +281,11 @@
             </span>
             <div class="grid grid-cols-2 gap-2">
               <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === 'anggota' ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
-                <input type="radio" bind:group={role} value="anggota" class="text-teal-700 focus:ring-teal-700" />
+                <input type="radio" bind:group={role} value="anggota" aria-label="Peran Anggota Kelas" class="text-teal-700 focus:ring-teal-700" />
                 <span class="text-xs">Anggota Kelas</span>
               </label>
               <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer transition {role === 'bendahara' ? 'border-teal-600 bg-teal-50/50 text-teal-900 font-semibold' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}">
-                <input type="radio" bind:group={role} value="bendahara" class="text-teal-700 focus:ring-teal-700" />
+                <input type="radio" bind:group={role} value="bendahara" aria-label="Peran Bendahara" class="text-teal-700 focus:ring-teal-700" />
                 <span class="text-xs">Bendahara</span>
               </label>
             </div>
@@ -293,17 +298,18 @@
               name="btn-submit"
               type="submit"
               disabled={isLoading}
+              aria-label="Daftar Akun Sekarang"
               class="w-full inline-flex items-center justify-center font-semibold transition-all duration-150 cursor-pointer select-none bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-sm hover:shadow-md px-5 py-2.5 text-base rounded-xl gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {#if isLoading}
-                <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <span>Mendaftarkan Akun...</span>
               {:else}
                 <span>Daftar Akun Sekarang</span>
-                <ArrowRight class="w-4 h-4 ml-1" />
+                <ArrowRight class="w-4 h-4 ml-1" aria-hidden="true" />
               {/if}
             </button>
           </div>
@@ -311,10 +317,10 @@
 
         <!-- Tautan Kembali ke Login -->
         <div class="mt-4 text-center">
-          <p class="text-xs text-slate-500">
+          <p class="text-xs text-slate-600">
             Sudah memiliki akun?
             <a href="/auth/login" class="font-bold text-teal-700 hover:text-teal-800 hover:underline inline-flex items-center gap-1">
-              <LogIn class="w-3.5 h-3.5" />
+              <LogIn class="w-3.5 h-3.5" aria-hidden="true" />
               <span>Masuk di sini</span>
             </a>
           </p>

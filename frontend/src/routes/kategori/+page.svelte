@@ -199,7 +199,7 @@
     <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
         <h2 class="font-bold text-slate-900 text-base">Pos Kategori Terdaftar</h2>
-        <span class="text-xs text-slate-400 font-semibold">{categories.length} Pos</span>
+        <span class="text-xs text-slate-600 font-semibold">{categories.length} Pos</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -215,7 +215,7 @@
           <tbody class="divide-y divide-slate-100">
             {#if isLoading}
               <tr>
-                <td colspan="4" class="p-8 text-center text-slate-400">
+                <td colspan="4" class="p-8 text-center text-slate-500">
                   <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-teal-700 border-t-transparent"></div>
                   <div class="mt-2 text-xs font-medium">Memuat kategori...</div>
                 </td>

@@ -59,10 +59,10 @@
   class="bg-white rounded-2xl border p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 {style.card} {customClass}"
 >
   <div class="flex items-center justify-between">
-    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">{title}</span>
+    <span class="text-xs font-bold uppercase tracking-wider text-slate-600">{title}</span>
     {#if IconComponent}
       <div class="w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 {style.iconBg}">
-        <IconComponent class="w-5 h-5" />
+        <IconComponent class="w-5 h-5" aria-hidden="true" />
       </div>
     {/if}
   </div>
@@ -72,7 +72,7 @@
       {value}
     </div>
     {#if subtext}
-      <div class="flex items-center gap-1.5 mt-2 text-xs text-slate-500">
+      <div class="flex items-center gap-1.5 mt-2 text-xs text-slate-600">
         <span class="w-1.5 h-1.5 rounded-full shrink-0 {style.dot}"></span>
         <span>{subtext}</span>
       </div>

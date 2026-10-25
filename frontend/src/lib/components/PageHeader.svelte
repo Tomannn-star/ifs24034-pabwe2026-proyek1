@@ -27,7 +27,7 @@
       <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{title}</h1>
     </div>
     {#if description}
-      <p class="text-slate-500 text-xs sm:text-sm mt-1">
+      <p class="text-slate-600 text-xs sm:text-sm mt-1">
         {description}
       </p>
     {/if}

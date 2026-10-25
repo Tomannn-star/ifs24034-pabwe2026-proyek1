@@ -191,13 +191,14 @@
   <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row gap-3">
     <div class="relative flex-1">
       <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-        <Search class="w-4 h-4" />
+        <Search class="w-4 h-4" aria-hidden="true" />
       </div>
       <input
         type="text"
         bind:value={searchQuery}
         oninput={() => loadMembers()}
         placeholder="Cari nama anggota atau nomor kontak..."
+        aria-label="Cari nama anggota atau nomor kontak"
         class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
       />
     </div>
@@ -206,6 +207,7 @@
       <select
         bind:value={filterAktif}
         onchange={() => loadMembers()}
+        aria-label="Filter status keaktifan anggota"
         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 transition"
       >
         <option value="">Semua Status</option>
