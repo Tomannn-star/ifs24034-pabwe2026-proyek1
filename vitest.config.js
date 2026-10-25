@@ -26,10 +26,14 @@ export default defineConfig({
         '.svelte-kit/**',
         '**/*.test.js',
         '**/*.spec.js',
+        '**/*.svelte',
         'postbuild.js',
         'vite.config.js',
         'vitest.config.js',
-        'src/lib/__mocks__/**'
+        'src/lib/__mocks__/**',
+        'src/lib/index.js',
+        'src/lib/services/index.js',
+        'src/lib/components/index.js'
       ]
     }
   }

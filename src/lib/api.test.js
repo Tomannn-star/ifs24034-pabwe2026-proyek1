@@ -23,11 +23,22 @@ describe("API Client & Helper", () => {
   });
 
   describe("getBaseUrl", () => {
-    test("mengembalikan base URL yang valid", () => {
-      const url = getBaseUrl();
-      expect(url).toBeDefined();
-      expect(typeof url).toBe("string");
-      expect(url.length).toBeGreaterThan(0);
+    test("mengembalikan base URL yang valid dengan override", () => {
+      expect(getBaseUrl("https://example.com/api/")).toBe("https://example.com/api");
+    });
+
+    test("mengarahkan ke backend Vercel saat berada di domain *.vercel.app", () => {
+      global.window = {
+        location: { hostname: "kaspintar.vercel.app" }
+      };
+      expect(getBaseUrl("")).toBe("https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api");
+    });
+
+    test("fallback ke localhost jika bukan di domain Vercel", () => {
+      global.window = {
+        location: { hostname: "localhost" }
+      };
+      expect(getBaseUrl("")).toBe("http://localhost:5001/api");
     });
   });
 
@@ -49,13 +60,28 @@ describe("API Client & Helper", () => {
       expect(fetchArgs[1].headers["Authorization"]).toBe("Bearer my-jwt-token");
     });
 
+    test("melakukan fetch tanpa header Authorization jika tidak ada token", async () => {
+      tokenService.clearSession();
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true })
+      });
+
+      const data = await apiRequest("categories");
+      expect(data).toEqual({ success: true });
+      const fetchArgs = global.fetch.mock.calls[0];
+      expect(fetchArgs[1].headers["Authorization"]).toBeUndefined();
+    });
+
     test("melempar error saat jaringan gagal / backend down", async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error("Network failed"));
 
       await expect(apiRequest("transactions")).rejects.toThrow(/Gagal terhubung ke server backend/);
     });
 
-    test("melempar error jika respon 401 Unauthorized dan memicu logout di browser", async () => {
+    test("melempar error jika respon 401 Unauthorized dan memicu logout di browser selain di login", async () => {
       global.window = {
         location: { pathname: "/transactions", hostname: "localhost" }
       };
@@ -67,7 +93,52 @@ describe("API Client & Helper", () => {
         json: async () => ({ error: "Sesi Anda telah berakhir" })
       });
 
-      await expect(apiRequest("profile")).rejects.toThrow(/Sesi/);
+      await expect(apiRequest("profile")).rejects.toThrow(/Sesi Anda telah berakhir/);
+    });
+
+    test("melempar fallback error jika respon 401 Unauthorized tanpa pesan error di JSON", async () => {
+      global.window = {
+        location: { pathname: "/dashboard", hostname: "localhost" }
+      };
+      global.document = { cookie: "" };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => { throw new Error("No JSON"); }
+      });
+
+      await expect(apiRequest("profile")).rejects.toThrow("Sesi login telah berakhir, silakan masuk kembali");
+    });
+
+    test("melempar error jika respon 401 Unauthorized tapi berada di halaman login", async () => {
+      global.window = {
+        location: { pathname: "/login", hostname: "localhost" }
+      };
+      global.document = { cookie: "" };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: "Username atau password salah" })
+      });
+
+      await expect(apiRequest("auth/login")).rejects.toThrow("Username atau password salah");
+    });
+
+    test("melempar error jika respon 401 Unauthorized saat berada di rute /auth/...", async () => {
+      global.window = {
+        location: { pathname: "/auth/login", hostname: "localhost" }
+      };
+      global.document = { cookie: "" };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: "Akses ditolak" })
+      });
+
+      await expect(apiRequest("auth/login")).rejects.toThrow("Akses ditolak");
     });
 
     test("melempar error umum jika respon status error non-401 tanpa payload error", async () => {

@@ -1,11 +1,18 @@
-import { describe, test, expect, beforeEach, vi } from "vitest";
-import { auth } from "./auth.js";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
+import { auth, navigateToLogin } from "./auth.js";
 import { toast } from "./toast.js";
 import { tokenService } from "../services/tokenService.js";
 
 describe("Svelte Stores", () => {
+  let originalWindow;
+
   beforeEach(() => {
+    originalWindow = global.window;
     tokenService.clearSession();
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
   });
 
   describe("auth store", () => {
@@ -34,20 +41,25 @@ describe("Svelte Stores", () => {
       expect(currentState.token).toBeNull();
       expect(currentState.user).toBeNull();
 
-      // Logout dengan redirect (simulasi di lingkungan browser)
-      const originalWindow = global.window;
-      const originalDocument = global.document;
+      // Logout dengan redirect (simulasi window browser)
       global.window = {
         location: { pathname: "/dashboard", href: "/dashboard" }
       };
       global.document = { cookie: "" };
 
-      expect(() => auth.logout(true)).not.toThrow();
+      auth.logout(true);
+      expect(global.window.location.href).toBe("/auth/login");
 
-      global.window = originalWindow;
-      global.document = originalDocument;
+      // Simulasi logout saat sudah di /auth/login
+      global.window.location.pathname = "/auth/login";
+      auth.logout(true);
 
       unsub();
+    });
+
+    test("navigateToLogin tidak error saat typeof window undefined", () => {
+      delete global.window;
+      expect(() => navigateToLogin()).not.toThrow();
     });
   });
 

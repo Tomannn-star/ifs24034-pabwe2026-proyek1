@@ -2,8 +2,6 @@ import { auth } from "./stores/auth.js";
 import { tokenService } from "./services/tokenService.js";
 import { ROUTES } from "./constants/index.js";
 
-const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
-
 // Ambil URL API dari environment variable (PUBLIC_API_URL atau VITE_API_URL)
 const envApiUrl = import.meta.env.PUBLIC_API_URL || 
                   import.meta.env.VITE_API_URL || 
@@ -14,10 +12,13 @@ const envApiUrl = import.meta.env.PUBLIC_API_URL ||
  * 1. Mengutamakan env variable jika diset
  * 2. Jika diakses dari domain Vercel (*.vercel.app), otomatis arahkan ke Vercel backend
  * 3. Jika di localhost, arahkan ke port 5001
+ * 
+ * @param {string} [overrideUrl]
+ * @returns {string}
  */
-export function getBaseUrl() {
-  if (envApiUrl && envApiUrl.trim() !== "") {
-    return envApiUrl.replace(/\/$/, "");
+export function getBaseUrl(overrideUrl = envApiUrl) {
+  if (overrideUrl && overrideUrl.trim() !== "") {
+    return overrideUrl.replace(/\/$/, "");
   }
   if (typeof window !== "undefined" && window.location?.hostname?.includes("vercel.app")) {
     return "https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api";
@@ -64,6 +65,7 @@ export async function apiRequest(endpoint, options = {}) {
 
   // Jika token tidak valid / kedaluwarsa, otomatis logout ke login page
   if (response.status === 401) {
+    const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
     if (isBrowser && window.location && !window.location.pathname.startsWith("/auth/") && window.location.pathname !== "/login") {
       auth.logout(true);
     }

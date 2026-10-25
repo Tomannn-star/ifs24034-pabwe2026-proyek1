@@ -8,22 +8,10 @@ import { writable } from "svelte/store";
 import { tokenService } from "../services/tokenService.js";
 import { ROUTES } from "../constants/index.js";
 
-const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
-
-function navigateToLogin() {
-  if (!isBrowser) return;
-  try {
-    import("$app/navigation").then(({ goto }) => {
-      goto(ROUTES.LOGIN);
-    }).catch(() => {
-      if (window.location && window.location.pathname !== ROUTES.LOGIN) {
-        window.location.href = ROUTES.LOGIN;
-      }
-    });
-  } catch {
-    if (window.location && window.location.pathname !== ROUTES.LOGIN) {
-      window.location.href = ROUTES.LOGIN;
-    }
+export function navigateToLogin() {
+  if (typeof window === "undefined") return;
+  if (window.location && window.location.pathname !== ROUTES.LOGIN) {
+    window.location.href = ROUTES.LOGIN;
   }
 }
 

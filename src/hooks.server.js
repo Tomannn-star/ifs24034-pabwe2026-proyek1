@@ -4,7 +4,7 @@
  * dan izin peran pengguna yang tersimpan di dalam HTTP Cookie.
  */
 
-import { APP_CONFIG, ROUTES, USER_ROLES, RESTRICTED_BENDAHARA_ROUTES } from "$lib/constants/index.js";
+import { APP_CONFIG, ROUTES, USER_ROLES, RESTRICTED_BENDAHARA_ROUTES } from "./lib/constants/index.js";
 
 /**
  * Handle hook server SvelteKit

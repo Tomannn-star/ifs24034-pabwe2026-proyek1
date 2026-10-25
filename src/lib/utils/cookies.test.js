@@ -51,6 +51,12 @@ describe("Browser Cookie Utilities", () => {
     expect(getCookie("default_cookie")).toBe("default_val");
   });
 
+  test("setCookie pada HTTP tidak menambahkan atribut Secure", () => {
+    global.window.location.protocol = "http:";
+    setCookie("http_cookie", "http_val");
+    expect(getCookie("http_cookie")).toBe("http_val");
+  });
+
   test("getCookie mengembalikan null jika cookie tidak ditemukan", () => {
     expect(getCookie("non_existing")).toBeNull();
   });

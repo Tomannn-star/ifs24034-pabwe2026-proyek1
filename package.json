@@ -23,7 +23,9 @@
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",
-		"#lib/*": "./src/lib/*"
+		"#lib/*": "./src/lib/*",
+		"$app/environment": "./src/lib/__mocks__/app-environment.js",
+		"$app/navigation": "./src/lib/__mocks__/app-navigation.js"
 	},
 	"dependencies": {
 		"@fontsource-variable/plus-jakarta-sans": "^5.3.0",

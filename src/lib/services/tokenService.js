@@ -27,19 +27,21 @@ export class TokenService {
    */
   init() {
     if (isClientEnvironment()) {
-      const cookieToken = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
-      const storageToken = typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN) : null;
-      const token = cookieToken || storageToken || null;
+      let token = getCookie(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      if (!token && typeof localStorage !== "undefined") {
+        token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TOKEN);
+      }
 
       if (token && this.isTokenExpired(token)) {
         this.clearSession();
         return;
       }
-      this.#token = token;
+      this.#token = token || null;
 
-      const cookieUser = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
-      const storageUser = typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER) : null;
-      const rawUser = cookieUser || storageUser;
+      let rawUser = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
+      if (!rawUser && typeof localStorage !== "undefined") {
+        rawUser = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
+      }
       if (rawUser) {
         try {
           this.#user = JSON.parse(rawUser);
@@ -116,7 +118,10 @@ export class TokenService {
     }
     if (this.#user) return this.#user;
     if (isClientEnvironment()) {
-      const raw = getCookie(APP_CONFIG.STORAGE_KEYS.USER) || (typeof localStorage !== "undefined" ? localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER) : null);
+      let raw = getCookie(APP_CONFIG.STORAGE_KEYS.USER);
+      if (!raw && typeof localStorage !== "undefined") {
+        raw = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER);
+      }
       if (raw) {
         try {
           return JSON.parse(raw);

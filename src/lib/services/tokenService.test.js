@@ -176,5 +176,39 @@ describe("Token & Session Management Service", () => {
 
       expect(tokenService.getUser()).toBeNull();
     });
+
+    test("getUser membersihkan sesi dan mengembalikan null jika token saat ini telah expired", () => {
+      const expiredJwt = makeMockJwt({ exp: Math.floor(Date.now() / 1000) - 100 });
+      tokenService.setSession(expiredJwt, { username: "expired_user" });
+      expect(tokenService.getUser()).toBeNull();
+      expect(tokenService.getToken()).toBeNull();
+    });
+
+    test("membaca token dan user dari localStorage saat cookie kosong", () => {
+      const validJwt = makeMockJwt({ exp: Math.floor(Date.now() / 1000) + 7200 });
+      cookieStore = "";
+      storage = {};
+      storage[APP_CONFIG.STORAGE_KEYS.TOKEN] = validJwt;
+      storage[APP_CONFIG.STORAGE_KEYS.USER] = JSON.stringify({ username: "local_only_user" });
+
+      const newInst = new TokenService();
+      expect(newInst.getToken()).toBe(validJwt);
+      expect(newInst.getUser()?.username).toBe("local_only_user");
+    });
+
+    test("berjalan aman ketika localStorage tidak tersedia (undefined)", () => {
+      const originalLocalStorage = global.localStorage;
+      delete global.localStorage;
+
+      const token = makeMockJwt({ exp: Math.floor(Date.now() / 1000) + 3600 });
+      tokenService.setSession(token, { username: "no_ls_user" });
+
+      expect(tokenService.getToken()).toBe(token);
+      expect(tokenService.getUser()?.username).toBe("no_ls_user");
+      tokenService.setUser({ username: "no_ls_user_updated" });
+      tokenService.clearSession();
+
+      global.localStorage = originalLocalStorage;
+    });
   });
 });
